@@ -10,13 +10,13 @@ mainClock = pygame.time.Clock()
 from pygame.locals import *
 pygame.init()
 pygame.display.set_caption('game base')
-screen = pygame.display.set_mode((600, 300),0,32)
+screen = pygame.display.set_mode((800, 640),0,0)
 
 #Setting up the font that will be used
 font = pygame.font.SysFont(None, 30)
 
 #Setting up the player
-player = pygame.Rect((300, 250, 50, 50))
+player = pygame.Rect((370, 300, 50, 50))
 
 """
 A function that can be used to write text on our screen and buttons
@@ -77,36 +77,51 @@ def main_menu():
 This function is called when the "PLAY" button is clicked.
 """
 def game():
-    running = True
-    while running:
-        screen.fill((0,0,0))
-        # 'Draws' the box for the player sprite
-        pygame.draw.rect(screen, (255, 0, 0), player)
-        # Gets the key that has been pressed
-        key = pygame.key.get_pressed()
-        # Depending on the key that has been pressed, the box moves that way
-        if key[pygame.K_a] == True:
-          player.move_ip(-1,0)
-        elif key[pygame.K_d] == True:
-          player.move_ip(1,0)
-        elif key[pygame.K_w] == True:
-          player.move_ip(0,-1)
-        elif key[pygame.K_s] == True:
-          player.move_ip(0,1)
+            running = True
+            player_image = pygame.image.load('player_image.png')
+  #Size of the player
+            player_image = pygame.transform.scale(player_image, (40, 40))
 
-        # Game loop ?
-        draw_text('GAME SCREEN', font, (255,255 ,255 ), screen, 20, 20)
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
-            # Set up controls
+            camera_x, camera_y = 0, 0
 
-        pygame.display.update()
-        mainClock.tick(60)
+            while running:
+                screen.fill((0, 0, 0))
+                # Loads the background for the game
+                screen.blit(pygame.image.load('Images/Rough Draft Design.png'), (50 - camera_x, 50 - camera_y))
+
+                # Draw the player at the relative position on the screen
+                screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
+
+                # Gets the key that has been pressed
+                key = pygame.key.get_pressed()
+
+                # Depending on the key that has been pressed, the player moves that way
+                if key[pygame.K_a] == True:
+                    player.move_ip(-5, 0)
+                elif key[pygame.K_d] == True:
+                    player.move_ip(5, 0)
+                elif key[pygame.K_w] == True:
+                    player.move_ip(0, -5)
+                elif key[pygame.K_s] == True:
+                    player.move_ip(0, 5)
+
+                # Adjust the camera position to follow the player
+                camera_x = player.x - (screen.get_width() // 2)
+                camera_y = player.y - (screen.get_height() // 2)
+
+                # Game loop
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        pygame.quit()
+                        sys.exit()
+                    if event.type == KEYDOWN:
+                        if event.key == K_ESCAPE:
+                            running = False
+
+                pygame.display.update()
+                mainClock.tick(60)
+
+
 
 
 #This function is called when the "Controls" button is clicked.
