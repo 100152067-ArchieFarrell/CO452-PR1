@@ -15,6 +15,9 @@ screen = pygame.display.set_mode((600, 300),0,32)
 #Setting up the font that will be used
 font = pygame.font.SysFont(None, 30)
 
+#Setting up the player
+player = pygame.Rect((300, 250, 50, 50))
+
 """
 A function that can be used to write text on our screen and buttons
 """
@@ -77,6 +80,20 @@ def game():
     running = True
     while running:
         screen.fill((0,0,0))
+        # 'Draws' the box for the player sprite
+        pygame.draw.rect(screen, (255, 0, 0), player)
+        # Gets the key that has been pressed
+        key = pygame.key.get_pressed()
+        # Depending on the key that has been pressed, the box moves that way
+        if key[pygame.K_a] == True:
+          player.move_ip(-1,0)
+        elif key[pygame.K_d] == True:
+          player.move_ip(1,0)
+        elif key[pygame.K_w] == True:
+          player.move_ip(0,-1)
+        elif key[pygame.K_s] == True:
+          player.move_ip(0,1)
+
         # Game loop ?
         draw_text('GAME SCREEN', font, (255,255 ,255 ), screen, 20, 20)
         for event in pygame.event.get():
@@ -91,19 +108,19 @@ def game():
         pygame.display.update()
         mainClock.tick(60)
 
-"""
-This function is called when the "Controls" button is clicked.
-"""
+
+#This function is called when the "Controls" button is clicked.
+
 def controls():
     running = True
     while running:
         screen.fill((0,190,255))
 
         draw_text('CONTROLS SCREEN', font, (255, 255, 255), screen, 200, 20)
-        draw_text('UP - W', font, (255, 255, 255), screen, 200, 100)
-        draw_text('DOWN - S', font, (255, 255, 255), screen, 200, 120)
-        draw_text('LEFT - A', font, (255, 255, 255), screen, 200, 140)
-        draw_text('RIGHT - D', font, (255, 255, 255), screen, 200, 160)
+        draw_text('UP - W', font, (255, 255, 255), screen, 260, 100)
+        draw_text('DOWN - S', font, (255, 255, 255), screen, 260, 120)
+        draw_text('LEFT - A', font, (255, 255, 255), screen, 260, 140)
+        draw_text('RIGHT - D', font, (255, 255, 255), screen, 260, 160)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
