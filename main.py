@@ -77,52 +77,59 @@ def main_menu():
 This function is called when the "PLAY" button is clicked.
 """
 def game():
-            running = True
-            player_image = pygame.image.load('player_image.png')
-            #Size of the player
-            player_image = pygame.transform.scale(player_image, (40, 40))
-            
-            background = pygame.image.load('Images/Rough Draft Design.png')
-            background = pygame.transform.scale(background,(1600, 1280))
+                running = True
+                player_image = pygame.image.load('player_image.png')
+                player_image = pygame.transform.scale(player_image, (40, 40))
 
-            camera_x, camera_y = 0, 0
+                background = pygame.image.load('Images/Rough Draft Design.png')
+                background = pygame.transform.scale(background, (1600, 1280))
 
-            while running:
-                screen.fill((0, 0, 0))
-                # Loads the background for the game
-                screen.blit(background, (40 - camera_x, 60 - camera_y))
+                firstbackground = pygame.image.load('Images/firstbackground.png')
+                firstbackground = pygame.transform.scale(background, (1600, 1280))
 
-                # Draw the player at the relative position on the screen
-                screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
+                # Set up boundaries
+                boundary_left = 0
+                boundary_right = 1600 - player.width
+                boundary_top = 0
+                boundary_bottom = 1280 - player.height
 
-                # Gets the key that has been pressed
-                key = pygame.key.get_pressed()
+                camera_x, camera_y = 0, 0
 
-                # Depending on the key that has been pressed, the player moves that way
-                if key[pygame.K_a] == True:
-                    player.move_ip(-8, 0)
-                elif key[pygame.K_d] == True:
-                    player.move_ip(8, 0)
-                elif key[pygame.K_w] == True:
-                    player.move_ip(0, -8)
-                elif key[pygame.K_s] == True:
-                    player.move_ip(0, 8)
+                while running:
+                    screen.fill((0, 0, 0))
+                    screen.blit(background, (0 - camera_x, 0 - camera_y))
+                    screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
 
-                # Adjust the camera position to follow the player
-                camera_x = player.x - (screen.get_width() // 2)
-                camera_y = player.y - (screen.get_height() // 2)
+                    key = pygame.key.get_pressed()
 
-                # Game loop
-                for event in pygame.event.get():
-                    if event.type == QUIT:
-                        pygame.quit()
-                        sys.exit()
-                    if event.type == KEYDOWN:
-                        if event.key == K_ESCAPE:
-                            running = False
+                    # Save the current position for boundary checking
+                    player_x, player_y = player.x, player.y
 
-                pygame.display.update()
-                mainClock.tick(60)
+                    if key[pygame.K_a] == True and player.x > boundary_left:
+                        player.move_ip(-8, 0)
+                    elif key[pygame.K_d] == True and player.x < boundary_right:
+                        player.move_ip(8, 0)
+                    elif key[pygame.K_w] == True and player.y > boundary_top:
+                        player.move_ip(0, -8)
+                    elif key[pygame.K_s] == True and player.y < boundary_bottom:
+                        player.move_ip(0, 8)
+
+                    # Adjust the camera position to follow the player
+                    camera_x = player.x - (screen.get_width() // 2)
+                    camera_y = player.y - (screen.get_height() // 2)
+
+                    # Game loop
+                    for event in pygame.event.get():
+                        if event.type == QUIT:
+                            pygame.quit()
+                            sys.exit()
+                        if event.type == KEYDOWN:
+                            if event.key == K_ESCAPE:
+                                running = False
+
+                    pygame.display.update()
+                    mainClock.tick(60)
+
 
 #This function is called when the "Controls" button is clicked.
 
