@@ -79,15 +79,18 @@ This function is called when the "PLAY" button is clicked.
 def game():
             running = True
             player_image = pygame.image.load('player_image.png')
-  #Size of the player
+            #Size of the player
             player_image = pygame.transform.scale(player_image, (40, 40))
+            
+            background = pygame.image.load('Images/Rough Draft Design.png')
+            background = pygame.transform.scale(background,(1600, 1280))
 
             camera_x, camera_y = 0, 0
 
             while running:
                 screen.fill((0, 0, 0))
                 # Loads the background for the game
-                screen.blit(pygame.image.load('Images/Rough Draft Design.png'), (50 - camera_x, 50 - camera_y))
+                screen.blit(background, (40 - camera_x, 60 - camera_y))
 
                 # Draw the player at the relative position on the screen
                 screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
@@ -97,13 +100,13 @@ def game():
 
                 # Depending on the key that has been pressed, the player moves that way
                 if key[pygame.K_a] == True:
-                    player.move_ip(-5, 0)
+                    player.move_ip(-8, 0)
                 elif key[pygame.K_d] == True:
-                    player.move_ip(5, 0)
+                    player.move_ip(8, 0)
                 elif key[pygame.K_w] == True:
-                    player.move_ip(0, -5)
+                    player.move_ip(0, -8)
                 elif key[pygame.K_s] == True:
-                    player.move_ip(0, 5)
+                    player.move_ip(0, 8)
 
                 # Adjust the camera position to follow the player
                 camera_x = player.x - (screen.get_width() // 2)
@@ -120,9 +123,6 @@ def game():
 
                 pygame.display.update()
                 mainClock.tick(60)
-
-
-
 
 #This function is called when the "Controls" button is clicked.
 
@@ -147,7 +147,4 @@ def controls():
         pygame.display.update()
         mainClock.tick(60)
 
-
-
 main_menu()
-
