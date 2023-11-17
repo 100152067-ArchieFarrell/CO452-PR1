@@ -82,10 +82,7 @@ def game():
                 player_image = pygame.transform.scale(player_image, (40, 40))
 
                 background = pygame.image.load('Images/Rough Draft Design.png')
-                background = pygame.transform.scale(background, (1600, 1280))
-
-                firstbackground = pygame.image.load('Images/firstbackground.png')
-                firstbackground = pygame.transform.scale(background, (1600, 1280))
+                background = pygame.transform.scale(background, (2400, 1920))
 
                 # Set up boundaries
                 boundary_left = 0
