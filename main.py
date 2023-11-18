@@ -9,7 +9,7 @@ Setting up an environment to initialize pygame
 mainClock = pygame.time.Clock()
 from pygame.locals import *
 pygame.init()
-pygame.display.set_caption('game base')
+pygame.display.set_caption('The Whispers')
 screen = pygame.display.set_mode((800, 640),0,0)
 
 #Setting up the font that will be used
@@ -35,13 +35,13 @@ def main_menu():
     while True:
 
         screen.fill((0,190,255))
-        draw_text('Main Menu', font, (0,0,0), screen, 250, 40)
+        draw_text('Main Menu', font, (0,0,0), screen, 350, 250)
 
         mx, my = pygame.mouse.get_pos()
 
         #Creates the buttons on the screen
-        button_1 = pygame.Rect(200, 100, 200, 50)
-        button_2 = pygame.Rect(200, 180, 200, 50)
+        button_1 = pygame.Rect(300, 280, 200, 50)
+        button_2 = pygame.Rect(300, 340, 200, 50)
 
         #Funtions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
@@ -54,8 +54,8 @@ def main_menu():
         pygame.draw.rect(screen, (255, 0, 0), button_2)
 
         #Text that will be displayed on the buttons
-        draw_text('PLAY', font, (255,255,255), screen, 270, 115)
-        draw_text('CONTROLS', font, (255,255,255), screen, 240, 195)
+        draw_text('PLAY', font, (255,255,255), screen, 376, 298)
+        draw_text('CONTROLS', font, (255,255,255), screen, 343, 358)
 
         click = False
         for event in pygame.event.get():
@@ -135,11 +135,11 @@ def controls():
     while running:
         screen.fill((0,190,255))
 
-        draw_text('CONTROLS SCREEN', font, (255, 255, 255), screen, 200, 20)
-        draw_text('UP - W', font, (255, 255, 255), screen, 260, 100)
-        draw_text('DOWN - S', font, (255, 255, 255), screen, 260, 120)
-        draw_text('LEFT - A', font, (255, 255, 255), screen, 260, 140)
-        draw_text('RIGHT - D', font, (255, 255, 255), screen, 260, 160)
+        draw_text('CONTROLS SCREEN', font, (255, 255, 255), screen, 300, 20)
+        draw_text('UP - W', font, (255, 255, 255), screen, 352, 100)
+        draw_text('DOWN - S', font, (255, 255, 255), screen, 352, 120)
+        draw_text('LEFT - A', font, (255, 255, 255), screen, 352, 140)
+        draw_text('RIGHT - D', font, (255, 255, 255), screen, 352, 160)
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
