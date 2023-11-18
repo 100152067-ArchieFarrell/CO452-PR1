@@ -15,8 +15,8 @@ screen = pygame.display.set_mode((800, 640),0,0)
 #Setting up the font that will be used
 font = pygame.font.SysFont(None, 30)
 
-#Setting up the player
-player = pygame.Rect((370, 300, 50, 50))
+#Setting up the player (x location , y location, width, height)
+player = pygame.Rect((1170, 915, 50, 50))
 
 """
 A function that can be used to write text on our screen and buttons
@@ -85,10 +85,10 @@ def game():
                 background = pygame.transform.scale(background, (2400, 1920))
 
                 # Set up boundaries
-                boundary_left = 0
-                boundary_right = 1600 - player.width
-                boundary_top = 0
-                boundary_bottom = 1280 - player.height
+                boundary_left = 401
+                boundary_right = 2010 - player.width
+                boundary_top = 321
+                boundary_bottom = 1607 - player.height
 
                 camera_x, camera_y = 0, 0
 
