@@ -1,9 +1,10 @@
 import pygame, sys
+from pygame.locals import *
+from UserInterface import UserInterface
+from healthBar import *
 
 # Setting up the environment to initialize pygame
 mainClock = pygame.time.Clock()
-from pygame.locals import *
-from UserInterface import UserInterface
 pygame.init()
 pygame.display.set_caption('The Whispers')
 screen = pygame.display.set_mode((800, 640),0,0)
@@ -17,13 +18,6 @@ UI = UserInterface()
 # Setting up the player (x location, y location, width, height)
 player = pygame.Rect((1170, 915, 50, 50))
 
-# Health bar variables
-player_health = 100
-health_bar_length = 50
-health_bar_height = 10
-health_bar_color = (0, 255, 0)
-health_bar_outline_color = (0, 0, 0)
-
 # Function to write text on the screen and buttons
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -33,13 +27,6 @@ def draw_text(text, font, color, surface, x, y):
 
 # A variable to check for the status later
 click = False
-
-# Function to draw the health bar
-def draw_health_bar(surface, x, y, health):
-    if health < 0:
-        health = 0
-    pygame.draw.rect(surface, health_bar_color, (x, y, health, health_bar_height))
-    pygame.draw.rect(surface, health_bar_outline_color, (x, y, health_bar_length, health_bar_height), 2)
 
 # Main container function that holds the buttons and game functions
 def main_menu():
@@ -85,12 +72,36 @@ def main_menu():
 
 # This function is called when the "PLAY" button is clicked.
 def game():
+    # sets the running state of the game to "true"
     running = True
-    player_image = pygame.image.load('player_image.png')
-    player_image = pygame.transform.scale(player_image, (40, 40))
+    # loads the default image for the game's character
+    player_image = pygame.image.load('Images/frank.png')
+    player_image = pygame.transform.scale(player_image, (26, 42))
 
-    background = pygame.image.load('Images/Rough Draft Design.png')
-    background = pygame.transform.scale(background, (2400, 1920))
+    # map images
+    ground = pygame.image.load('Images/game map (image layers)/Ground.png')
+    ground = pygame.transform.scale(ground, (2400, 1920))
+
+    dungeon = pygame.image.load('Images/game map (image layers)/Dungeon.png')
+    dungeon = pygame.transform.scale(dungeon, (2400, 1920))
+
+    bushesStumps = pygame.image.load('Images/game map (image layers)/Bushes and Stumps.png')
+    bushesStumps = pygame.transform.scale(bushesStumps, (2400, 1920))
+
+    rocksBoxes = pygame.image.load('Images/game map (image layers)/Rocks and Boxes.png')
+    rocksBoxes = pygame.transform.scale(rocksBoxes, (2400, 1920))
+
+    shop = pygame.image.load('Images/game map (image layers)/Shop.png')
+    shop = pygame.transform.scale(shop, (2400, 1920))
+
+    shopFence = pygame.image.load('Images/game map (image layers)/Shop Fence and Sign.png')
+    shopFence = pygame.transform.scale(shopFence, (2400, 1920))
+
+    trees = pygame.image.load('Images/game map (image layers)/Trees.png')
+    trees = pygame.transform.scale(trees, (2400, 1920))
+
+    spawnerWalls = pygame.image.load('Images/game map (image layers)/Spawner walls.png')
+    spawnerWalls = pygame.transform.scale(spawnerWalls, (2400, 1920))
 
     # Set up boundaries
     boundary_left = 401
@@ -102,8 +113,15 @@ def game():
 
     while running:
         screen.fill((0, 0, 0))
-        screen.blit(background, (0 - camera_x, 0 - camera_y))
+        screen.blit(ground, (0 - camera_x, 0 - camera_y))
+        screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
+        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
+        screen.blit(shop, (0 - camera_x, 0 - camera_y))
         screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
+        screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
+        screen.blit(trees, (0 - camera_x, 0 - camera_y))
+        screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
+        screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
 
@@ -162,7 +180,7 @@ def controls():
           if event.type == KEYDOWN:
               if event.key == K_ESCAPE:
                   running = False
-      
+
         pygame.screen.update()
         mainClock.tick(60)
 
