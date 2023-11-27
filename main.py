@@ -16,7 +16,7 @@ font = pygame.font.SysFont(None, 30)
 UI = UserInterface()
 
 # Setting up the player (x location, y location, width, height)
-player = pygame.Rect((1170, 915, 50, 50))
+player = pygame.Rect((1114, 915, 50, 50))
 
 # Function to write text on the screen and buttons
 def draw_text(text, font, color, surface, x, y):
@@ -104,10 +104,10 @@ def game():
     spawnerWalls = pygame.transform.scale(spawnerWalls, (2400, 1920))
 
     # Set up boundaries
-    boundary_left = 401
-    boundary_right = 2010 - player.width
-    boundary_top = 321
-    boundary_bottom = 1607 - player.height
+    boundary_left = 501
+    boundary_right = 1770 - player.width
+    boundary_top = 483
+    boundary_bottom = 1445 - player.height
 
     camera_x, camera_y = 0, 0
 
@@ -115,9 +115,9 @@ def game():
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
         screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
-        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shop, (0 - camera_x, 0 - camera_y))
         screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
+        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
         screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))

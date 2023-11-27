@@ -14,7 +14,7 @@ class UserInterface:
         self.largefont = pygame.font.SysFont("Verdana", 40)
 
         self.inventory = Inventory()
-        self.inventoryRender = True
+        self.inventoryRender = False
 
         self.text = self.regularfont.render("0", True, self.color_black)
 
