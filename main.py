@@ -46,7 +46,7 @@ def main_menu():
                 game()
         if button_2.collidepoint((mx, my)):
             if click:
-                controls()
+                controls(mx,my)
         pygame.draw.rect(screen, (255, 0, 0), button_1)
         pygame.draw.rect(screen, (255, 0, 0), button_2)
 
@@ -163,7 +163,7 @@ def game():
         mainClock.tick(60)
 
 # This function is called when the "Controls" button is clicked.
-def controls():
+def controls(mx,my):
     running = True
     while running:
         screen.fill((0,190,255))
@@ -173,15 +173,17 @@ def controls():
         draw_text('DOWN - S', font, (255, 255, 255), screen, 352, 120)
         draw_text('LEFT - A', font, (255, 255, 255), screen, 352, 140)
         draw_text('RIGHT - D', font, (255, 255, 255), screen, 352, 160)
+        draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 180)
+
         for event in pygame.event.get():
           if event.type == QUIT:
-              pygame.quit()
-              sys.exit()
+            pygame.quit()
+            sys.exit()
           if event.type == KEYDOWN:
-              if event.key == K_ESCAPE:
-                  running = False
+            if event.key == K_ESCAPE:
+              running = False
 
-        pygame.screen.update()
+        pygame.display.update()
         mainClock.tick(60)
 
 main_menu()
