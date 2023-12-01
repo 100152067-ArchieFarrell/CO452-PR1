@@ -28,6 +28,17 @@ files = [
 ]
 
 [[package]]
+name = "knapkings"
+version = "0.0.1"
+description = "Daily Fantasy Sports Optimization Package"
+optional = false
+python-versions = ">=3"
+files = [
+    {file = "KnapKings-0.0.1-py3-none-any.whl", hash = "sha256:6ccebee0de51b52bb4104e5527c4e36be170767c9dbe9a45e94c0c0b855025a1"},
+    {file = "KnapKings-0.0.1.tar.gz", hash = "sha256:da383695a572c581ca2555872ca3f85486987c57cad76df0dcc4f9f66b725a8e"},
+]
+
+[[package]]
 name = "pygame"
 version = "2.5.0"
 description = "Python Game Development"
@@ -91,7 +102,20 @@ files = [
     {file = "pygame-2.5.0.tar.gz", hash = "sha256:edd5745b79435976d92c0a7318aedcafcb7ac4567125ac6ba88aa473559ef9ab"},
 ]
 
+[[package]]
+name = "pygame-spritesheet"
+version = "0.2.0"
+description = "Python pygame extension that provides SpriteSheet class."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pygame-spritesheet-0.2.0.tar.gz", hash = "sha256:fd209d863084d6e1dd05cbf690cdb8798a7cc3b3f72212b1ae2addce8945be77"},
+]
+
+[package.dependencies]
+pygame = "*"
+
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10.0"
-content-hash = "5e87325b3835bfcefdcd3a01afb512f9063d24ed31ebd7620dcf328c01c74d86"
+content-hash = "d076bb82202e2fe2c2be83561ac32268e0da411ac5e6b1581e61a18989bcbb8d"

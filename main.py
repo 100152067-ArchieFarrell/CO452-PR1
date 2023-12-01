@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from UserInterface import UserInterface
 from healthBar import *
+import spritesheet
 
 # Setting up the environment to initialize pygame
 mainClock = pygame.time.Clock()
@@ -18,6 +19,20 @@ UI = UserInterface()
 # Setting up the player (x location, y location, width, height)
 player = pygame.Rect((1114, 915, 50, 50))
 
+# animations
+sprite_sheet_image = pygame.image.load('Images/player.png').convert_alpha()
+sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
+
+# walk forward
+animation_list = []
+animation_steps = 6
+last_update = pygame.time.get_ticks()
+animation_cooldown = 250
+frame = 0
+
+for x in range(animation_steps):
+  animation_list.append(sprite_sheet.get_image(x, 48, 48, 2, 50))
+  
 # Function to write text on the screen and buttons
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -43,7 +58,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game()
+                game(last_update, frame)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -71,7 +86,7 @@ def main_menu():
         mainClock.tick(60)
 
 # This function is called when the "PLAY" button is clicked.
-def game():
+def game(last_update, frame):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
@@ -128,6 +143,16 @@ def game():
         # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
 
+      # animation
+        current_time = pygame.time.get_ticks()
+        if current_time - last_update >= animation_cooldown:
+          frame += 1
+          last_update = current_time
+          if frame >= len(animation_list):
+            frame = 0
+        
+        screen.blit(animation_list[frame],(0,0))
+      
         if key[pygame.K_a] == True and player.x > boundary_left:
             player.move_ip(-8, 0)
         elif key[pygame.K_d] == True and player.x < boundary_right:
