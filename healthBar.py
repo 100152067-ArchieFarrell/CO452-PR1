@@ -1,7 +1,7 @@
 import pygame
 
 # Health bar variables
-player_health = 100
+player_health = 50
 health_bar_length = 50
 health_bar_height = 10
 health_bar_color = (0, 255, 0)

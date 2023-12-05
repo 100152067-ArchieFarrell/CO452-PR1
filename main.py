@@ -19,20 +19,26 @@ UI = UserInterface()
 # Setting up the player (x location, y location, width, height)
 player = pygame.Rect((1114, 915, 50, 50))
 
-# animations
-sprite_sheet_image = pygame.image.load('Images/player.png').convert_alpha()
+# Loading the sprite sheets for animations
+sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
 sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
 
-# walk forward
+# List of animations and variables which will be used for updating the player's animation
 animation_list = []
-animation_steps = 6
+animation_steps = [6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 3, 3]
+action = 0 
 last_update = pygame.time.get_ticks()
 animation_cooldown = 250
 frame = 0
+step_counter = 0
 
-for x in range(animation_steps):
-  animation_list.append(sprite_sheet.get_image(x, 48, 48, 2, 50))
-  
+for animation in animation_steps:
+  temp_img_list = []
+  for _ in range(animation):
+    temp_img_list.append(sprite_sheet.get_image(step_counter, 48, 48, 2, (17, 55, 4)))
+    step_counter += 1
+  animation_list.append(temp_img_list)
+
 # Function to write text on the screen and buttons
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
@@ -58,7 +64,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame)
+                game(last_update, frame, action)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -86,7 +92,7 @@ def main_menu():
         mainClock.tick(60)
 
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame):
+def game(last_update, frame, action):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
@@ -131,12 +137,6 @@ def game(last_update, frame):
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
         screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
         screen.blit(shop, (0 - camera_x, 0 - camera_y))
-        screen.blit(player_image, (player.x - camera_x, player.y - camera_y))
-        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
-        screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
-        screen.blit(trees, (0 - camera_x, 0 - camera_y))
-        screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
-        screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
 
@@ -148,18 +148,28 @@ def game(last_update, frame):
         if current_time - last_update >= animation_cooldown:
           frame += 1
           last_update = current_time
-          if frame >= len(animation_list):
+          if frame >= len(animation_list[action]):
             frame = 0
-        
-        screen.blit(animation_list[frame],(0,0))
-      
+
+        screen.blit(animation_list[action][frame],(330, 280))
+
+        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
+        screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
+        screen.blit(trees, (0 - camera_x, 0 - camera_y))
+        screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
+        screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
+
         if key[pygame.K_a] == True and player.x > boundary_left:
+            action = 6
             player.move_ip(-8, 0)
         elif key[pygame.K_d] == True and player.x < boundary_right:
+            action = 5
             player.move_ip(8, 0)
         elif key[pygame.K_w] == True and player.y > boundary_top:
+            action = 7
             player.move_ip(0, -8)
         elif key[pygame.K_s] == True and player.y < boundary_bottom:
+            action = 4
             player.move_ip(0, 8)
         elif key[pygame.K_e] == True:
           UI.toggleInventory()
@@ -169,8 +179,8 @@ def game(last_update, frame):
         camera_y = player.y - (screen.get_height() // 2)
 
         # Update health bar position with respect to the player
-        health_bar_x = player.x - camera_x
-        health_bar_y = player.y - camera_y - 20
+        health_bar_x = player.x - camera_x - 13
+        health_bar_y = player.y - camera_y - 13
 
         # Draw the health bar
         draw_health_bar(screen, health_bar_x, health_bar_y, player_health)
