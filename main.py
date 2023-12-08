@@ -2,6 +2,7 @@ import pygame, sys
 from pygame.locals import *
 from UserInterface import UserInterface
 from healthBar import *
+from enemy import *
 import spritesheet
 
 # Setting up the environment to initialize pygame
@@ -18,6 +19,10 @@ UI = UserInterface()
 
 # Setting up the player (x location, y location, width, height)
 player = pygame.Rect((1114, 915, 50, 50))
+
+# Setting up the enemy
+#enemy = Enemy()
+enemy = pygame.Rect((200, 200, 50, 50))
 
 # Loading the sprite sheets for animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
@@ -64,7 +69,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action)
+                game(last_update, frame, action, player)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -92,12 +97,15 @@ def main_menu():
         mainClock.tick(60)
 
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action):
+def game(last_update, frame, action, player):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
+    # enemy image
+    enemy_image = pygame.image.load('Images/zombie.jpg')
+    enemy_image = pygame.transform.scale(enemy_image, (45, 42))
 
     # map images
     ground = pygame.image.load('Images/game map (image layers)/Ground.png')
@@ -140,6 +148,23 @@ def game(last_update, frame, action):
 
         key = pygame.key.get_pressed()
 
+        # Calculate the distance between the enemy and the player
+        distance_x = player.x - enemy.x
+        distance_y = player.y - enemy.y
+        distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
+
+        # Move the enemy towards the player
+        speed = 2
+        if distance != 0:
+            enemy.x += speed * distance_x / distance
+            enemy.y += speed * distance_y / distance
+        screen.blit(enemy_image, (enemy.x, enemy.y))
+
+      # Call the update method of the enemy
+        #enemy.update(player)
+
+      # Render the enemy on the screen
+        #enemy.render(screen)
         # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
 
@@ -152,7 +177,7 @@ def game(last_update, frame, action):
             frame = 0
 
         screen.blit(animation_list[action][frame],(330, 280))
-
+        #enemy.render(screen)
         screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
@@ -173,6 +198,8 @@ def game(last_update, frame, action):
             player.move_ip(0, 8)
         elif key[pygame.K_e] == True:
           UI.toggleInventory()
+        else:
+          action=0
 
         # Adjust the camera position to follow the player
         camera_x = player.x - (screen.get_width() // 2)
