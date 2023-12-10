@@ -3,6 +3,7 @@ from pygame.locals import *
 from UserInterface import UserInterface
 from healthBar import *
 from enemy import *
+from player import *
 import spritesheet
 
 # Setting up the environment to initialize pygame
@@ -18,11 +19,11 @@ font = pygame.font.SysFont(None, 30)
 UI = UserInterface()
 
 # Setting up the player (x location, y location, width, height)
-player = pygame.Rect((1114, 915, 50, 50))
+player = Player(1114, 915, 50, 50)
 
 # Setting up the enemy
-#enemy = Enemy()
-enemy = pygame.Rect((200, 200, 50, 50))
+enemy1 = Enemy(1000, 1000, 50, 5, "Images/zombie.jpg")
+enemy2 = Enemy(700, 700, 50, 5, "Images/zombie.jpg")
 
 # Loading the sprite sheets for animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
@@ -148,24 +149,12 @@ def game(last_update, frame, action, player):
 
         key = pygame.key.get_pressed()
 
-        # Calculate the distance between the enemy and the player
-        distance_x = player.x - enemy.x
-        distance_y = player.y - enemy.y
-        distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
+      # Call the update method of the enemy (this can likely be a loop when we are calling multiple enemies in groups and such) 
+        enemy1.move_towards_player(player, camera_x, camera_y)
+        enemy2.move_towards_player(player, camera_x, camera_y)
 
-        # Move the enemy towards the player
-        speed = 2
-        if distance != 0:
-            enemy.x += speed * distance_x / distance
-            enemy.y += speed * distance_y / distance
-        screen.blit(enemy_image, (enemy.x, enemy.y))
-
-      # Call the update method of the enemy
-        #enemy.update(player)
-
-      # Render the enemy on the screen
-        #enemy.render(screen)
-        # Save the current position for boundary checking
+      
+      # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
 
       # animation
@@ -176,8 +165,13 @@ def game(last_update, frame, action, player):
           if frame >= len(animation_list[action]):
             frame = 0
 
+        if frame < 0 or frame >= len(animation_list[action]):
+          frame = 0  # Set the default frame if it's out of range
+
         screen.blit(animation_list[action][frame],(330, 280))
-        #enemy.render(screen)
+        # again, can be a loop when calling enemies in groups or waves
+        enemy1.render(screen, camera_x, camera_y)
+        enemy2.render(screen, camera_x, camera_y)
         screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
@@ -186,16 +180,16 @@ def game(last_update, frame, action, player):
 
         if key[pygame.K_a] == True and player.x > boundary_left:
             action = 6
-            player.move_ip(-8, 0)
+            player.x -= 8
         elif key[pygame.K_d] == True and player.x < boundary_right:
             action = 5
-            player.move_ip(8, 0)
+            player.x += 8
         elif key[pygame.K_w] == True and player.y > boundary_top:
             action = 7
-            player.move_ip(0, -8)
+            player.y -= 8
         elif key[pygame.K_s] == True and player.y < boundary_bottom:
             action = 4
-            player.move_ip(0, 8)
+            player.y += 8
         elif key[pygame.K_e] == True:
           UI.toggleInventory()
         else:

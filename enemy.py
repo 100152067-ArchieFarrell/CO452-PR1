@@ -1,49 +1,22 @@
 # enemy.py
-
-# enemy.py
 import pygame
-import random
 
-class Enemy(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
+class Enemy:
+    def __init__(self, x, y, size, speed, image):
+        self.image = pygame.image.load(image)
+        self.image = pygame.transform.scale(self.image, (size, size))
+        self.map_x = x  # Store the initial x position relative to the map
+        self.map_y = y  # Store the initial y position relative to the map
+        self.size = size
+        self.speed = speed
 
-        self.image = pygame.Surface((30, 30))
-        self.image.fill((255, 0, 0))  # Red color for simplicity
-        self.rect = self.image.get_rect()
+    def move_towards_player(self, player, camera_x, camera_y):
+        direction_vector = pygame.Vector2(player.x - self.map_x, player.y - self.map_y)
+        distance = direction_vector.length()
+        if distance > 0:  # Check if the distance is non-zero
+            direction = direction_vector.normalize()
+            self.map_x += direction.x * self.speed
+            self.map_y += direction.y * self.speed
 
-        # Set initial position randomly
-        self.rect.x = random.randrange(500, 600)
-        self.rect.y = random.randrange(500, 600)
-
-        # Set speed
-        self.speed = 8
-
-    #def update(self, player):
-        # Calculate the direction vector towards the player
-        #dx = player.x - self.rect.x
-        #dy = player.y - self.rect.y
-
-        # Calculate the distance between the enemy and the player
-        #distance = hypot(dx, dy)
-
-        # Normalize the direction vector
-        #if distance != 0:
-            #dx /= distance
-            #dy /= distance
-
-        # Move the enemy towards the player
-        #self.rect.x += dx * self.speed
-        #self.rect.y += dy * self.speed
-
-    def render(self, screen):
-      screen.blit(self.image, self.rect)
-
-        # You can add attack logic here if needed
-
-
-
-
-def hypot(dx, dy):
-    # Helper function to calculate the hypotenuse
-    return (dx ** 2 + dy ** 2) ** 0.5
+    def render(self, screen, camera_x, camera_y):
+        screen.blit(self.image, (self.map_x - camera_x, self.map_y - camera_y))
