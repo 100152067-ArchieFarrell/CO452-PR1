@@ -1,4 +1,5 @@
 import pygame, sys
+import random
 from pygame.locals import *
 from UserInterface import UserInterface
 from healthBar import *
@@ -22,8 +23,22 @@ UI = UserInterface()
 player = Player(1114, 915, 50, 50)
 
 # Setting up the enemy
-enemy1 = Enemy(1000, 1000, 50, 5, "Images/zombie.jpg")
-enemy2 = Enemy(700, 700, 50, 5, "Images/zombie.jpg")
+
+#enemy1 = Enemy(800, 1000, 50, 1, 2, "Images/zombie.jpg")
+#enemy2 = Enemy(1500, 500, 50, 2, 2, "Images/zombie.jpg")
+enemies = []
+
+# Setting up an "enemy wave" function
+
+def enemyWave(Enemy, player, camera_x, camera_y):
+  enemies=[]
+  amountInGroup = 3
+  groups = 2
+  for x in range(0, groups):
+    for x in range(0, amountInGroup):
+      enemy = Enemy(random.randint(800, 1000), random.randint(600, 1000), 50, 1, 2, "Images/zombie.jpg")
+      enemies.append(enemy)
+  return enemies
 
 # Loading the sprite sheets for animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
@@ -34,14 +49,14 @@ animation_list = []
 animation_steps = [6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 3, 3]
 action = 0 
 last_update = pygame.time.get_ticks()
-animation_cooldown = 250
+animation_cooldown = 500
 frame = 0
 step_counter = 0
 
 for animation in animation_steps:
   temp_img_list = []
   for _ in range(animation):
-    temp_img_list.append(sprite_sheet.get_image(step_counter, 48, 48, 2, (17, 55, 4)))
+    temp_img_list.append(sprite_sheet.get_image(step_counter, 48, 64, 2, (17, 55, 4)))
     step_counter += 1
   animation_list.append(temp_img_list)
 
@@ -70,7 +85,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action, player)
+                game(last_update, frame, action, player, enemies)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -98,7 +113,7 @@ def main_menu():
         mainClock.tick(60)
 
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, player):
+def game(last_update, frame, action, player, enemies):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
@@ -150,9 +165,9 @@ def game(last_update, frame, action, player):
         key = pygame.key.get_pressed()
 
       # Call the update method of the enemy (this can likely be a loop when we are calling multiple enemies in groups and such) 
-        enemy1.move_towards_player(player, camera_x, camera_y)
-        enemy2.move_towards_player(player, camera_x, camera_y)
-
+        
+        #enemy1.move_towards_player(player, camera_x, camera_y)
+        #enemy2.move_towards_player(player, camera_x, camera_y)
       
       # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
@@ -168,10 +183,16 @@ def game(last_update, frame, action, player):
         if frame < 0 or frame >= len(animation_list[action]):
           frame = 0  # Set the default frame if it's out of range
 
-        screen.blit(animation_list[action][frame],(330, 280))
+        screen.blit(animation_list[action][frame],(362, 280))
         # again, can be a loop when calling enemies in groups or waves
-        enemy1.render(screen, camera_x, camera_y)
-        enemy2.render(screen, camera_x, camera_y)
+        #enemy1.render(screen, camera_x, camera_y)
+        #enemy2.render(screen, camera_x, camera_y)
+        if key[pygame.K_l] == True:
+          enemies = enemyWave(Enemy, player, camera_x, camera_y)
+        
+        for enemy in enemies:
+          enemy.move_towards_player(player, camera_x, camera_y)
+          enemy.render(screen, camera_x, camera_y)
         screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
@@ -190,6 +211,10 @@ def game(last_update, frame, action, player):
         elif key[pygame.K_s] == True and player.y < boundary_bottom:
             action = 4
             player.y += 8
+        elif key[pygame.K_SPACE] == True:
+            action = 8
+        elif key[pygame.K_SPACE] and key[pygame.K.s] == True:
+            action = 9
         elif key[pygame.K_e] == True:
           UI.toggleInventory()
         else:

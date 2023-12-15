@@ -2,13 +2,14 @@
 import pygame
 
 class Enemy:
-    def __init__(self, x, y, size, speed, image):
+    def __init__(self, x, y, size, speed, health, image):
         self.image = pygame.image.load(image)
         self.image = pygame.transform.scale(self.image, (size, size))
         self.map_x = x  # Store the initial x position relative to the map
         self.map_y = y  # Store the initial y position relative to the map
         self.size = size
         self.speed = speed
+        self.health = health
 
     def move_towards_player(self, player, camera_x, camera_y):
         direction_vector = pygame.Vector2(player.x - self.map_x, player.y - self.map_y)
