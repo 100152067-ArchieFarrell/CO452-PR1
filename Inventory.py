@@ -10,11 +10,7 @@ class Inventory:
         self.rect = self.image.get_rect()
         self.rect.topleft = (220, 104)
 
-        self.slots.append(InventorySlot("Images/Items/potion_03a.png",(297, 186)))
-        self.slots.append(InventorySlot("Images/Items/potion_03a.png", (361, 186)))
-
-
-    def render(self, screen):
+    def render(self, screen, mouse_pos):
         screen.blit(self.image, self.rect) 
         for slot in self.slots:
-            slot.render(screen)
+            slot.render(screen, mouse_pos)

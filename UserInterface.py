@@ -22,11 +22,11 @@ class UserInterface:
         self.text = self.regularfont.render(str(fps), True, self.color_black)
 
 
-    def render(self, screen):
+    def render(self, screen, mouse_pos):
         screen.blit(self.text, (700, 20))
 
         if self.inventoryRender == True:
-            self.inventory.render(screen)
+            self.inventory.render(screen, mouse_pos)
 
 
     def toggleInventory(self):

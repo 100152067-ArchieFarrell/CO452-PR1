@@ -76,6 +76,7 @@ def main_menu():
         # Creates the buttons on the screen
         button_1 = pygame.Rect(300, 280, 200, 50)
         button_2 = pygame.Rect(300, 340, 200, 50)
+        button_3 = pygame.Rect(300, 400, 200, 50)
 
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
@@ -84,12 +85,17 @@ def main_menu():
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
+        if button_3.collidepoint((mx, my)):
+            if click:
+                credits()
         pygame.draw.rect(screen, (255, 0, 0), button_1)
         pygame.draw.rect(screen, (255, 0, 0), button_2)
+        pygame.draw.rect(screen, (255, 0, 0), button_3)
 
         # Text that will be displayed on the buttons
         draw_text('PLAY', font, (255,255,255), screen, 376, 298)
         draw_text('CONTROLS', font, (255,255,255), screen, 343, 358)
+        draw_text('CREDITS', font, (255,255,255), screen, 358, 418)
 
         click = False
         for event in pygame.event.get():
@@ -154,8 +160,30 @@ def gameOver():
       pygame.display.update()
       mainClock.tick(60)
 
+# This function is called when the "CREDITS" button is clicked.
+def credits():
+  running = True
+  while running:
+      screen.fill((0,190,255))
+
+      draw_text('CREDITS SCREEN', font, (255, 255, 255), screen, 300, 20)
+      draw_text('(ASSETS CREDITS)', font, (255, 255, 255), screen, 304, 100)
+      draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 180)
+
+      for event in pygame.event.get():
+        if event.type == QUIT:
+          pygame.quit()
+          sys.exit()
+        if event.type == KEYDOWN:
+          if event.key == K_ESCAPE:
+            running = False
+
+      pygame.display.update()
+      mainClock.tick(60)
+      
 # This function is called when the "PLAY" button is clicked.
 def game(last_update, frame, action, Player,enemies):
+    mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
@@ -206,6 +234,8 @@ def game(last_update, frame, action, Player,enemies):
     enemy_attack_cooldown = 1000  # Cooldown for enemy attacks in milliseconds
 
     last_enemy_attack = pygame.time.get_ticks()
+
+    shop_active = False
     while running:
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
@@ -293,6 +323,63 @@ def game(last_update, frame, action, Player,enemies):
         else:
           action=0
 
+        # Inventory system
+        if UI.inventoryRender:
+          click = pygame.mouse.get_pressed()
+          if click[0] == 1:  # Left mouse button clicked
+            for slot in UI.inventory.slots:
+              if slot.rect.collidepoint((mx, my)):
+                  # Check if the slot has items
+                  if slot.count > 0:
+                      # Handle item interaction here, for example, using items
+                      slot.count -= 1
+                      # Add logic for using the item or updating player stats
+
+        # Shop system
+        shop_location = (400, 500)
+        # Calculate the distance between the shop and the player
+        distance_x = player.x - 400
+        distance_y = player.y - 500
+        distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
+        if distance < 2000 and key[pygame.K_i] == True:
+            shop_active = True
+          
+        if shop_active == True:
+          #Shop / Chat UI
+          shopUIbg = pygame.Rect(0, 0, 800, 150)
+          pygame.draw.rect(screen, (10, 10, 10), shopUIbg)
+
+          shopUIchatbox = pygame.Rect(10, 10, 540, 130)
+          pygame.draw.rect(screen, (20, 20, 20), shopUIchatbox)
+
+          shopUIchatboxTop = pygame.Rect(10, 10, 540, 10)
+          pygame.draw.rect(screen, (30, 30, 30), shopUIchatboxTop)
+
+          shopUIimagebox = pygame.Rect(560, 10, 230, 130)
+          pygame.draw.rect(screen, (50, 50, 50), shopUIimagebox)
+
+          # Buttons for items
+          healthPotionButton = pygame.Rect(20, 90, 200, 40)
+          pygame.draw.rect(screen, (30, 0, 120), healthPotionButton)
+          draw_text('Buy Health Potion', font, (255, 255, 255), screen, 30, 100)
+
+          strengthPotionButton = pygame.Rect(230, 90, 230, 40)
+          pygame.draw.rect(screen, (30, 10, 120), strengthPotionButton)
+          draw_text('Buy Strength Potion', font, (255, 255, 255), screen, 240, 100)
+
+          # Check if the player clicks on the shop item
+          mx, my = pygame.mouse.get_pos()
+          click = pygame.mouse.get_pressed()
+          if healthPotionButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (60, 40, 150), healthPotionButton, 2)
+
+          if strengthPotionButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (60, 40, 150), strengthPotionButton, 2)
+          if healthPotionButton.collidepoint((mx, my)) and click[0] == 1:
+            # Add the purchased item to the inventory
+            UI.inventory.slots[0].count += 1  # Update based on your inventory structure
+
+
         # Adjust the camera position to follow the player
         camera_x = player.x - (screen.get_width() // 2)
         camera_y = player.y - (screen.get_height() // 2)
@@ -323,8 +410,10 @@ def game(last_update, frame, action, Player,enemies):
           if event.type == MOUSEBUTTONDOWN:
               if event.button == 1:
                 click = True
+          if event.type == MOUSEMOTION:  # Handle mouse movement
+            mouse_pos = pygame.mouse.get_pos()  # Get the x and y coordinates of the mouse position
                 
-        UI.render(screen)
+        UI.render(screen, mouse_pos)
         pygame.display.update()
         mainClock.tick(60)
 
@@ -352,4 +441,5 @@ def controls(mx,my):
         pygame.display.update()
         mainClock.tick(60)
 
+# Runs the main menu function so it is the first thing the user sees.
 main_menu()
