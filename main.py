@@ -23,20 +23,17 @@ UI = UserInterface()
 player = Player(1114, 915, 50, 50)
 
 # Setting up the enemy
-
-#enemy1 = Enemy(800, 1000, 50, 1, 2, "Images/zombie.jpg")
-#enemy2 = Enemy(1500, 500, 50, 2, 2, "Images/zombie.jpg")
 enemies = []
 
 # Setting up an "enemy wave" function
-
 def enemyWave(Enemy, player, camera_x, camera_y):
   enemies=[]
   amountInGroup = 3
-  groups = 2
-  for x in range(0, groups):
+  groups = 4
+  for i in range(0, groups):
     for x in range(0, amountInGroup):
-      enemy = Enemy(random.randint(800, 1000), random.randint(600, 1000), 50, 1, 2, "Images/zombie.jpg")
+      groupCoords = [(random.randint(850, 900), random.randint(430, 480)),((random.randint(1700, 1750), random.randint(730, 780))),(random.randint(700, 750), random.randint(1400, 1450)),(random.randint(430, 480), random.randint(1120, 1170))]
+      enemy = Enemy(groupCoords[i][0], groupCoords[i][1],50, random.randint(1, 3), 2, "Images/zombie.jpg")
       enemies.append(enemy)
   return enemies
 
@@ -147,6 +144,7 @@ def game(last_update, frame, action, player, enemies):
 
     spawnerWalls = pygame.image.load('Images/game map (image layers)/Spawner walls.png')
     spawnerWalls = pygame.transform.scale(spawnerWalls, (2400, 1920))
+    spawnerWalls_visible = True
 
     # Set up boundaries
     boundary_left = 501
@@ -163,11 +161,6 @@ def game(last_update, frame, action, player, enemies):
         screen.blit(shop, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
-
-      # Call the update method of the enemy (this can likely be a loop when we are calling multiple enemies in groups and such) 
-        
-        #enemy1.move_towards_player(player, camera_x, camera_y)
-        #enemy2.move_towards_player(player, camera_x, camera_y)
       
       # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
@@ -184,12 +177,11 @@ def game(last_update, frame, action, player, enemies):
           frame = 0  # Set the default frame if it's out of range
 
         screen.blit(animation_list[action][frame],(362, 280))
-        # again, can be a loop when calling enemies in groups or waves
-        #enemy1.render(screen, camera_x, camera_y)
-        #enemy2.render(screen, camera_x, camera_y)
+        
+        # enemy spawning
         if key[pygame.K_l] == True:
           enemies = enemyWave(Enemy, player, camera_x, camera_y)
-        
+          spawnerWalls_visible = False
         for enemy in enemies:
           enemy.move_towards_player(player, camera_x, camera_y)
           enemy.render(screen, camera_x, camera_y)
@@ -197,20 +189,25 @@ def game(last_update, frame, action, player, enemies):
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
         screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
-        screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
+        if spawnerWalls_visible:
+          screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
 
         if key[pygame.K_a] == True and player.x > boundary_left:
             action = 6
-            player.x -= 8
+            #player.x -= 8
+            player.x -= 20
         elif key[pygame.K_d] == True and player.x < boundary_right:
             action = 5
-            player.x += 8
+            #player.x += 8
+            player.x += 20
         elif key[pygame.K_w] == True and player.y > boundary_top:
             action = 7
-            player.y -= 8
+            #player.y -= 8
+            player.y -= 20
         elif key[pygame.K_s] == True and player.y < boundary_bottom:
             action = 4
-            player.y += 8
+            #player.y += 8
+            player.y += 20
         elif key[pygame.K_SPACE] == True:
             action = 8
         elif key[pygame.K_SPACE] and key[pygame.K.s] == True:
