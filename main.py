@@ -19,9 +19,6 @@ font = pygame.font.SysFont(None, 30)
 #UI
 UI = UserInterface()
 
-# Setting up the player (x location, y location, width, height)
-player = Player(1114, 915, 50, 50)
-
 # Setting up the enemy
 enemies = []
 
@@ -69,6 +66,7 @@ click = False
 
 # Main container function that holds the buttons and game functions
 def main_menu():
+    click = False
     while True:
         screen.fill((0,190,255))
         draw_text('Main Menu', font, (0,0,0), screen, 350, 250)
@@ -82,7 +80,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action, player, enemies)
+                game(last_update, frame, action, Player, enemies)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -109,11 +107,59 @@ def main_menu():
         pygame.display.update()
         mainClock.tick(60)
 
+def gameOver():
+  click = False
+  # Game over variables
+  game_over_font = pygame.font.SysFont(None, 50)
+  game_over_text = game_over_font.render('Game Over', True, (255, 0, 0))
+  try_again_button = pygame.Rect(300, 280, 200, 50)
+  main_menu_button = pygame.Rect(300, 340, 200, 50)
+  quit_button = pygame.Rect(300, 400, 200, 50)
+  while True:
+      screen.fill((0,190,255))
+      screen.blit(game_over_text, (300, 220))
+      pygame.draw.rect(screen, (255, 0, 0), try_again_button)
+      pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
+      pygame.draw.rect(screen, (255, 0, 0), quit_button)
+
+      draw_text('Try Again', font, (255, 255, 255), screen, 345, 298)
+      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 358)
+      draw_text('Quit', font, (255, 255, 255), screen, 370, 418)
+
+      mx, my = pygame.mouse.get_pos()
+
+      if try_again_button.collidepoint((mx, my)):
+          if click:
+              game(last_update, frame, action, Player, enemies)
+
+      if main_menu_button.collidepoint((mx, my)):
+          if click:
+              # Return to the main menu
+              main_menu()
+
+      if quit_button.collidepoint((mx, my)):
+          if click:
+              # Quit the game
+              pygame.quit()
+              sys.exit()
+
+      for event in pygame.event.get():
+          if event.type == QUIT:
+              pygame.quit()
+              sys.exit()
+          if event.type == MOUSEBUTTONDOWN:
+              if event.button == 1:
+                  click = True
+
+      pygame.display.update()
+      mainClock.tick(60)
+
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, player, enemies):
+def game(last_update, frame, action, Player,enemies):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
+    player = Player(1114, 915, 50, 50)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
     # enemy image
@@ -154,6 +200,12 @@ def game(last_update, frame, action, player, enemies):
 
     camera_x, camera_y = 0, 0
 
+    # Set up variables for combat
+    player_health = 50  # Initial health of the player
+    max_player_health = 50
+    enemy_attack_cooldown = 1000  # Cooldown for enemy attacks in milliseconds
+
+    last_enemy_attack = pygame.time.get_ticks()
     while running:
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
@@ -161,7 +213,7 @@ def game(last_update, frame, action, player, enemies):
         screen.blit(shop, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
-      
+
       # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
 
@@ -177,7 +229,7 @@ def game(last_update, frame, action, player, enemies):
           frame = 0  # Set the default frame if it's out of range
 
         screen.blit(animation_list[action][frame],(362, 280))
-        
+
         # enemy spawning
         if key[pygame.K_l] == True:
           enemies = enemyWave(Enemy, player, camera_x, camera_y)
@@ -185,6 +237,30 @@ def game(last_update, frame, action, player, enemies):
         for enemy in enemies:
           enemy.move_towards_player(player, camera_x, camera_y)
           enemy.render(screen, camera_x, camera_y)
+          # Check for player-enemy collision and update health
+          if (
+              player.x < enemy.map_x + enemy.size
+              and player.x + player.width > enemy.map_x
+              and player.y < enemy.map_y + enemy.size
+              and player.y + player.height > enemy.map_y
+              and action == 8  # Check if the player is attacking
+          ):
+              enemy.health -= 1  # Decrease enemy health on collision
+              if enemy.health <= 0:
+                  enemies.remove(enemy)  # Remove enemy instance if health reaches 0
+
+          # Check for enemy-player collision and update health
+          current_time = pygame.time.get_ticks()
+          if (
+              player.x < enemy.map_x + enemy.size
+              and player.x + player.width > enemy.map_x
+              and player.y < enemy.map_y + enemy.size
+              and player.y + player.height > enemy.map_y
+              and current_time - last_enemy_attack >= enemy_attack_cooldown
+          ):
+              player_health -= 10  # Decrease player health on collision
+              last_enemy_attack = current_time
+
         screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
@@ -228,14 +304,26 @@ def game(last_update, frame, action, player, enemies):
         # Draw the health bar
         draw_health_bar(screen, health_bar_x, health_bar_y, player_health)
 
+        if player_health <= 0:
+          if gameOver():
+              # Reset game state for a new try
+              player_health = max_player_health
+          else:
+              # Player chose to quit or go back to the main menu
+              break
+            
         # Game loop
         for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-            if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
+          if event.type == QUIT:
+              pygame.quit()
+              sys.exit()
+          if event.type == KEYDOWN:
+              if event.key == K_ESCAPE:
+                running = False
+          if event.type == MOUSEBUTTONDOWN:
+              if event.button == 1:
+                click = True
+                
         UI.render(screen)
         pygame.display.update()
         mainClock.tick(60)
