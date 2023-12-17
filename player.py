@@ -3,11 +3,13 @@ import sys
 import math
 
 class Player:
-  def __init__(self, x, y, width, height):
+  def __init__(self, x, y, width, height, strength, coins):
       self.x = x
       self.y = y
       self.width = width
       self.height = height
+      self.strength = strength
+      self.coins = coins
 
   def render(self, screen):
       pygame.draw.rect(screen, (255, 0, 0), (self.x, self.y, self.width, self.height))

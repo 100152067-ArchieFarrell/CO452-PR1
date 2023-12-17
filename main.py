@@ -2,6 +2,7 @@ import pygame, sys
 import random
 from pygame.locals import *
 from UserInterface import UserInterface
+from InventorySlot import InventorySlot
 from healthBar import *
 from enemy import *
 from player import *
@@ -15,9 +16,6 @@ screen = pygame.display.set_mode((800, 640),0,0)
 
 # Setting up the font that will be used
 font = pygame.font.SysFont(None, 30)
-
-#UI
-UI = UserInterface()
 
 # Setting up the enemy
 enemies = []
@@ -182,12 +180,13 @@ def credits():
       mainClock.tick(60)
       
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, Player,enemies):
+def game(last_update, frame, action, Player, enemies):
     mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
-    player = Player(1114, 915, 50, 50)
+    player = Player(1114, 915, 50, 50, 1, 200)
+    UI = UserInterface(player)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
     # enemy image
@@ -230,7 +229,7 @@ def game(last_update, frame, action, Player,enemies):
 
     # Set up variables for combat
     player_health = 50  # Initial health of the player
-    max_player_health = 50
+    player_strength = 1 # Initial strength of the player
     enemy_attack_cooldown = 1000  # Cooldown for enemy attacks in milliseconds
 
     last_enemy_attack = pygame.time.get_ticks()
@@ -275,7 +274,7 @@ def game(last_update, frame, action, Player,enemies):
               and player.y + player.height > enemy.map_y
               and action == 8  # Check if the player is attacking
           ):
-              enemy.health -= 1  # Decrease enemy health on collision
+              enemy.health -= player_strength  # Decrease enemy health on collision
               if enemy.health <= 0:
                   enemies.remove(enemy)  # Remove enemy instance if health reaches 0
 
@@ -329,21 +328,25 @@ def game(last_update, frame, action, Player,enemies):
           if click[0] == 1:  # Left mouse button clicked
             for slot in UI.inventory.slots:
               if slot.rect.collidepoint((mx, my)):
-                  # Check if the slot has items
-                  if slot.count > 0:
-                      # Handle item interaction here, for example, using items
-                      slot.count -= 1
-                      # Add logic for using the item or updating player stats
-
+                  if slot.item and slot.item.name == "Health Potion" and player_health < 50 and slot.count > 0:
+                    slot.count -= 1
+                    player_health += 10
+                    print("Health Potion Used")
+                    
+                  if slot.item and slot.item.name == "Strength Potion" and player_strength < 5 and slot.count > 0:
+                    slot.count -= 1
+                    player_strength += 1
+                    print("Strength Potion Used")
+                    
         # Shop system
-        shop_location = (400, 500)
         # Calculate the distance between the shop and the player
-        distance_x = player.x - 400
-        distance_y = player.y - 500
+        distance_x = player.x - 500
+        distance_y = player.y - 600
         distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
-        if distance < 2000 and key[pygame.K_i] == True:
-            shop_active = True
-          
+        if distance < 250 and key[pygame.K_i] == True:
+            # Used as a "switch" for the shop. Inverts the current state of the shop_active variable.
+            shop_active = not shop_active
+
         if shop_active == True:
           #Shop / Chat UI
           shopUIbg = pygame.Rect(0, 0, 800, 150)
@@ -367,18 +370,47 @@ def game(last_update, frame, action, Player,enemies):
           pygame.draw.rect(screen, (30, 10, 120), strengthPotionButton)
           draw_text('Buy Strength Potion', font, (255, 255, 255), screen, 240, 100)
 
+          keyButton = pygame.Rect(470, 90, 120, 40)
+          pygame.draw.rect(screen, (30, 20, 120), keyButton)
+          draw_text('Buy Key', font, (255, 255, 255), screen, 490, 100)
+
           # Check if the player clicks on the shop item
           mx, my = pygame.mouse.get_pos()
           click = pygame.mouse.get_pressed()
           if healthPotionButton.collidepoint((mx, my)):
             pygame.draw.rect(screen, (60, 40, 150), healthPotionButton, 2)
+            if click[0] == 1:
+              if player.coins >= 10:
+                player.coins -= 10
+                
+                for slot in UI.inventory.slots:
+                  if slot.item and slot.item.name == "Health Potion":
+                      slot.count += 1
+                      break
 
           if strengthPotionButton.collidepoint((mx, my)):
-            pygame.draw.rect(screen, (60, 40, 150), strengthPotionButton, 2)
-          if healthPotionButton.collidepoint((mx, my)) and click[0] == 1:
-            # Add the purchased item to the inventory
-            UI.inventory.slots[0].count += 1  # Update based on your inventory structure
+              pygame.draw.rect(screen, (60, 40, 150), strengthPotionButton, 2)
+              if click[0] == 1:
+                if player.coins >= 20:
+                  player.coins -= 20
 
+                  for slot in UI.inventory.slots:
+                      if slot.item and slot.item.name == "Strength Potion":
+                          slot.count += 1
+                          break
+                        
+          if keyButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (60, 40, 150), keyButton, 2)
+            if click[0] == 1:
+              if player.coins >= 100:
+                player.coins -= 100
+                UI.inventory.slots.append(InventorySlot("Key", "Images/Items/key.png", (417, 176)))
+                
+                for slot in UI.inventory.slots:
+                    if slot.item and slot.item.name == "Key":
+                        slot.count += 1
+                        break
+                      
 
         # Adjust the camera position to follow the player
         camera_x = player.x - (screen.get_width() // 2)
@@ -412,7 +444,7 @@ def game(last_update, frame, action, Player,enemies):
                 click = True
           if event.type == MOUSEMOTION:  # Handle mouse movement
             mouse_pos = pygame.mouse.get_pos()  # Get the x and y coordinates of the mouse position
-                
+
         UI.render(screen, mouse_pos)
         pygame.display.update()
         mainClock.tick(60)

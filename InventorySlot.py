@@ -1,11 +1,13 @@
 import pygame
 
 class InventorySlot:
-    def __init__(self, name, pos):
-        self.image = pygame.image.load(name)
+    def __init__(self, name, image_path, pos):
+        self.name = name
+        self.image = pygame.image.load(image_path)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
         self.count = 0
+        self.item = self
 
         self.font = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 20)
 
@@ -15,6 +17,6 @@ class InventorySlot:
 
         # Change the appearance when the mouse hovers over the slot
         if self.rect.collidepoint(mouse_pos):
-            pygame.draw.rect(screen, (200, 255, 0), self.rect, 2)
-          
+            pygame.draw.rect(screen, (250, 250, 250), self.rect, 2)
+
         screen.blit(text, self.rect.midright)
