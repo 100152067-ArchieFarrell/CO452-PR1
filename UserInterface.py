@@ -10,9 +10,9 @@ class UserInterface:
         self.color_black = (0, 0, 0)
         self.color_white = (255, 255, 255)
 
-        self.smallfont = pygame.font.SysFont("Verdana", 12)
-        self.regularfont = pygame.font.SysFont("Verdana", 20)
-        self.largefont = pygame.font.SysFont("Verdana", 40)
+        self.smallfont = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 12)
+        self.regularfont = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 20)
+        self.largefont = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 40)
 
         self.inventory = Inventory()
         self.inventoryRender = False
@@ -37,5 +37,8 @@ class UserInterface:
     def displayCoins(self, surface):
       if hasattr(self.player, 'coins'):
           coinCounter = f'Coins: {self.player.coins}'
-          coinCounterSurface = self.regularfont.render(coinCounter, True, self.color_black)
-          surface.blit(coinCounterSurface, (680, 20))
+          shadowSurface = self.regularfont.render(coinCounter, True, self.color_black)
+          surface.blit(shadowSurface, (652, 12))
+
+          coinCounterSurface = self.regularfont.render(coinCounter, True, self.color_white)
+          surface.blit(coinCounterSurface, (650, 10))

@@ -6,6 +6,7 @@ from InventorySlot import InventorySlot
 from healthBar import *
 from enemy import *
 from player import *
+from coin import Coin
 import spritesheet
 
 # Setting up the environment to initialize pygame
@@ -185,7 +186,7 @@ def game(last_update, frame, action, Player, enemies):
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
-    player = Player(1114, 915, 50, 50, 1, 200)
+    player = Player(1114, 915, 50, 50, 1, 0)
     UI = UserInterface(player)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
@@ -231,7 +232,8 @@ def game(last_update, frame, action, Player, enemies):
     player_health = 50  # Initial health of the player
     player_strength = 1 # Initial strength of the player
     enemy_attack_cooldown = 1000  # Cooldown for enemy attacks in milliseconds
-
+    
+    enemyCoins = []
     last_enemy_attack = pygame.time.get_ticks()
 
     shop_active = False
@@ -277,6 +279,10 @@ def game(last_update, frame, action, Player, enemies):
               enemy.health -= player_strength  # Decrease enemy health on collision
               if enemy.health <= 0:
                   enemies.remove(enemy)  # Remove enemy instance if health reaches 0
+                  coinAmount = random.randint(1, 5)
+                  for i in range(coinAmount):
+                    coin = Coin(1, "Images/Items/coin.png", position=(enemy.map_x + random.randint(1,10), enemy.map_y + random.randint(1, 10)))
+                    enemyCoins.append(coin)
 
           # Check for enemy-player collision and update health
           current_time = pygame.time.get_ticks()
@@ -289,6 +295,21 @@ def game(last_update, frame, action, Player, enemies):
           ):
               player_health -= 10  # Decrease player health on collision
               last_enemy_attack = current_time
+
+        for coin in enemyCoins:
+          # Checks if the coordinates of the player and coin instance are overlapping
+          if (
+              player.x < coin.rect.x + coin.rect.width
+              and player.x + player.width > coin.rect.x
+              and player.y < coin.rect.y + coin.rect.height
+              and player.y + player.height > coin.rect.y
+          ):
+            # Player picked up the coin, add its value to the player's coin counter
+            player.coins += coin.value
+            # Remove the coin from the list
+            enemyCoins.remove(coin)
+          coin.update()
+          coin.render(screen, camera_x, camera_y)
 
         screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
