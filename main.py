@@ -33,6 +33,8 @@ def enemyWave(Enemy, player, camera_x, camera_y):
       enemies.append(enemy)
   return enemies
 
+boss = Enemy(1200, 1000, 50, 4, 4, "player_image.png")
+
 # Loading the sprite sheets for animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
 sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
@@ -80,7 +82,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action, Player, enemies)
+                game(last_update, frame, action, Player, enemies, boss)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -181,12 +183,12 @@ def credits():
       mainClock.tick(60)
       
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, Player, enemies):
+def game(last_update, frame, action, Player, enemies, boss):
     mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
     # loads the default image for the game's character
-    player = Player(1114, 915, 50, 50, 1, 0)
+    player = Player(1114, 915, 50, 50, 1, 250)
     UI = UserInterface(player)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
@@ -231,13 +233,18 @@ def game(last_update, frame, action, Player, enemies):
     # Set up variables for combat
     player_health = 50  # Initial health of the player
     player_strength = 1 # Initial strength of the player
-    enemy_attack_cooldown = 1000  # Cooldown for enemy attacks in milliseconds
+    enemy_attack_cooldown = 30000  # Cooldown for enemy attacks in milliseconds
     
     enemyCoins = []
     last_enemy_attack = pygame.time.get_ticks()
+    lastWaveTime = pygame.time.get_ticks()
+    waveInterval = 10000
 
     shop_active = False
+    playerUsedShop = False
+    level = 1
     while running:
+        currentTime = pygame.time.get_ticks()
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
         screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
@@ -262,9 +269,12 @@ def game(last_update, frame, action, Player, enemies):
         screen.blit(animation_list[action][frame],(362, 280))
 
         # enemy spawning
-        if key[pygame.K_l] == True:
-          enemies = enemyWave(Enemy, player, camera_x, camera_y)
-          spawnerWalls_visible = False
+        if playerUsedShop == True:
+          if currentTime - lastWaveTime >= waveInterval and enemies == []:
+            enemies = enemyWave(Enemy, player, camera_x, camera_y)
+            spawnerWalls_visible = False
+            lastWaveTime = currentTime
+
         for enemy in enemies:
           enemy.move_towards_player(player, camera_x, camera_y)
           enemy.render(screen, camera_x, camera_y)
@@ -293,7 +303,7 @@ def game(last_update, frame, action, Player, enemies):
               and player.y + player.height > enemy.map_y
               and current_time - last_enemy_attack >= enemy_attack_cooldown
           ):
-              player_health -= 10  # Decrease player health on collision
+              player_health -= 5  # Decrease player health on collision
               last_enemy_attack = current_time
 
         for coin in enemyCoins:
@@ -345,13 +355,14 @@ def game(last_update, frame, action, Player, enemies):
 
         # Inventory system
         if UI.inventoryRender:
-          click = pygame.mouse.get_pressed()
-          if click[0] == 1:  # Left mouse button clicked
+          inventorymx, inventorymy = pygame.mouse.get_pos()
+          inventoryClick = pygame.mouse.get_pressed()
+          if inventoryClick[0] == 1:  # Left mouse button clicked
             for slot in UI.inventory.slots:
-              if slot.rect.collidepoint((mx, my)):
+              if slot.rect.collidepoint((inventorymx, inventorymy)):
                   if slot.item and slot.item.name == "Health Potion" and player_health < 50 and slot.count > 0:
                     slot.count -= 1
-                    player_health += 10
+                    player_health += 15
                     print("Health Potion Used")
                     
                   if slot.item and slot.item.name == "Strength Potion" and player_strength < 5 and slot.count > 0:
@@ -361,12 +372,14 @@ def game(last_update, frame, action, Player, enemies):
                     
         # Shop system
         # Calculate the distance between the shop and the player
-        distance_x = player.x - 500
-        distance_y = player.y - 600
-        distance = (distance_x ** 2 + distance_y ** 2) ** 0.5
-        if distance < 250 and key[pygame.K_i] == True:
-            # Used as a "switch" for the shop. Inverts the current state of the shop_active variable.
-            shop_active = not shop_active
+        shopDistanceX = player.x - 550
+        shopDistanceY = player.y - 600
+        shopDistance = (shopDistanceX ** 2 + shopDistanceY ** 2) ** 0.5
+        if shopDistance < 180 and level == 1:
+              shop_active = True
+              playerUsedShop = True
+        else:
+              shop_active = False
 
         if shop_active == True:
           #Shop / Chat UI
@@ -396,11 +409,11 @@ def game(last_update, frame, action, Player, enemies):
           draw_text('Buy Key', font, (255, 255, 255), screen, 490, 100)
 
           # Check if the player clicks on the shop item
-          mx, my = pygame.mouse.get_pos()
-          click = pygame.mouse.get_pressed()
-          if healthPotionButton.collidepoint((mx, my)):
+          shopmx, shopmy = pygame.mouse.get_pos()
+          shopClick = pygame.mouse.get_pressed()
+          if healthPotionButton.collidepoint((shopmx, shopmy)):
             pygame.draw.rect(screen, (60, 40, 150), healthPotionButton, 2)
-            if click[0] == 1:
+            if shopClick[0] == 1:
               if player.coins >= 10:
                 player.coins -= 10
                 
@@ -409,9 +422,9 @@ def game(last_update, frame, action, Player, enemies):
                       slot.count += 1
                       break
 
-          if strengthPotionButton.collidepoint((mx, my)):
+          if strengthPotionButton.collidepoint((shopmx, shopmy)):
               pygame.draw.rect(screen, (60, 40, 150), strengthPotionButton, 2)
-              if click[0] == 1:
+              if shopClick[0] == 1:
                 if player.coins >= 20:
                   player.coins -= 20
 
@@ -420,9 +433,9 @@ def game(last_update, frame, action, Player, enemies):
                           slot.count += 1
                           break
                         
-          if keyButton.collidepoint((mx, my)):
+          if keyButton.collidepoint((shopmx, shopmy)):
             pygame.draw.rect(screen, (60, 40, 150), keyButton, 2)
-            if click[0] == 1:
+            if shopClick[0] == 1:
               if player.coins >= 100:
                 player.coins -= 100
                 UI.inventory.slots.append(InventorySlot("Key", "Images/Items/key.png", (417, 176)))
@@ -431,7 +444,69 @@ def game(last_update, frame, action, Player, enemies):
                     if slot.item and slot.item.name == "Key":
                         slot.count += 1
                         break
-                      
+        
+        # Level 2
+        for slot in UI.inventory.slots:
+          if slot.item and slot.item.name == "Key" and slot.count > 0 and (1450 < player.x < 1620 and 1370 < player.y < 1400):
+            level = 2
+            slot.count = 0
+
+        if level == 2:
+          enemies = []
+          playerUsedShop = False
+          ground = pygame.image.load("Images/game map (image layers)/dungeonGround.png")
+          ground = pygame.transform.scale(ground, (2400, 1920))
+          dungeon = pygame.image.load("player_image.png")
+          shop = pygame.image.load("player_image.png")
+          bushesStumps = pygame.image.load("player_image.png")
+          shopFence = pygame.image.load("player_image.png")
+          trees = pygame.image.load("player_image.png")
+          rocksBoxes = pygame.image.load("player_image.png")
+          playerUsedShop = False
+          boss.move_towards_player(player, camera_x, camera_y)
+          boss.render(screen, camera_x, camera_y)
+
+          if (
+            player.x < boss.map_x + boss.size
+            and player.x + player.width > boss.map_x
+            and player.y < boss.map_y + boss.size
+            and player.y + player.height > boss.map_y
+            and action == 8  # Check if the player is attacking
+          ):
+            boss.health -= player_strength  # Decrease enemy health on collision
+            if boss.health <= 0:
+                enemies.remove(boss)  # Remove enemy instance if health reaches 0
+                coinAmount = 500
+                for i in range(coinAmount):
+                  coin = Coin(1, "Images/Items/coin.png", position=(boss.map_x + random.randint(1,10), boss.map_y + random.randint(1, 20)))
+                  enemyCoins.append(coin)
+                print("Game Complete")
+
+          # Check for enemy-player collision and update health
+          current_time = pygame.time.get_ticks()
+          if (
+            player.x < boss.map_x + boss.size
+            and player.x + player.width > boss.map_x
+            and player.y < boss.map_y + boss.size
+            and player.y + player.height > boss.map_y
+            and current_time - last_enemy_attack >= enemy_attack_cooldown
+          ):
+            player_health -= 15  # Decrease player health on collision
+
+          for coin in enemyCoins:
+          # Checks if the coordinates of the player and coin instance are overlapping
+            if (
+              player.x < coin.rect.x + coin.rect.width
+              and player.x + player.width > coin.rect.x
+              and player.y < coin.rect.y + coin.rect.height
+              and player.y + player.height > coin.rect.y
+            ):
+          # Player picked up the coin, add its value to the player's coin counter
+              player.coins += coin.value
+              # Remove the coin from the list
+              enemyCoins.remove(coin)
+            coin.update()
+            coin.render(screen, camera_x, camera_y)
 
         # Adjust the camera position to follow the player
         camera_x = player.x - (screen.get_width() // 2)
