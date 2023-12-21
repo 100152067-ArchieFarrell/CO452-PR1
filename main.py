@@ -33,8 +33,6 @@ def enemyWave(Enemy, player, camera_x, camera_y):
       enemies.append(enemy)
   return enemies
 
-boss = Enemy(1200, 1000, 50, 4, 4, "player_image.png")
-
 # Loading the sprite sheets for animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
 sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
@@ -82,7 +80,7 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action, Player, enemies, boss)
+                game(last_update, frame, action, Player, enemies)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -183,7 +181,7 @@ def credits():
       mainClock.tick(60)
       
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, Player, enemies, boss):
+def game(last_update, frame, action, Player, enemies):
     mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
@@ -193,6 +191,9 @@ def game(last_update, frame, action, Player, enemies, boss):
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
     # enemy image
+    boss = Enemy(1200, 1000, 50, 4, 50, "player_image.png")
+    bossArray = []
+    bossArray.append(boss)
     enemy_image = pygame.image.load('Images/zombie.jpg')
     enemy_image = pygame.transform.scale(enemy_image, (45, 42))
 
@@ -202,7 +203,7 @@ def game(last_update, frame, action, Player, enemies, boss):
 
     dungeon = pygame.image.load('Images/game map (image layers)/Dungeon.png')
     dungeon = pygame.transform.scale(dungeon, (2400, 1920))
-
+    
     bushesStumps = pygame.image.load('Images/game map (image layers)/Bushes and Stumps.png')
     bushesStumps = pygame.transform.scale(bushesStumps, (2400, 1920))
 
@@ -223,7 +224,7 @@ def game(last_update, frame, action, Player, enemies, boss):
     spawnerWalls_visible = True
 
     # Set up boundaries
-    boundary_left = 501
+    boundary_left = 514
     boundary_right = 1770 - player.width
     boundary_top = 483
     boundary_bottom = 1445 - player.height
@@ -248,7 +249,8 @@ def game(last_update, frame, action, Player, enemies, boss):
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
         screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
-        screen.blit(shop, (0 - camera_x, 0 - camera_y))
+        if level == 1:
+          screen.blit(shop, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
 
@@ -321,7 +323,8 @@ def game(last_update, frame, action, Player, enemies, boss):
           coin.update()
           coin.render(screen, camera_x, camera_y)
 
-        screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
+        if level == 1:
+          screen.blit(bushesStumps, (0 - camera_x, 0 - camera_y))
         screen.blit(shopFence, (0 - camera_x, 0 - camera_y))
         screen.blit(trees, (0 - camera_x, 0 - camera_y))
         screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
@@ -456,57 +459,71 @@ def game(last_update, frame, action, Player, enemies, boss):
           playerUsedShop = False
           ground = pygame.image.load("Images/game map (image layers)/dungeonGround.png")
           ground = pygame.transform.scale(ground, (2400, 1920))
-          dungeon = pygame.image.load("player_image.png")
-          shop = pygame.image.load("player_image.png")
-          bushesStumps = pygame.image.load("player_image.png")
-          shopFence = pygame.image.load("player_image.png")
-          trees = pygame.image.load("player_image.png")
-          rocksBoxes = pygame.image.load("player_image.png")
+          dungeon = pygame.image.load("Images/game map (image layers)/shadowing.png")
+          dungeon = pygame.transform.scale(dungeon, (2400, 1920))
+          shopFence = pygame.image.load("Images/game map (image layers)/walls.png")
+          shopFence = pygame.transform.scale(shopFence, (2400, 1920))
+          trees = pygame.image.load("Images/game map (image layers)/boxes.png")
+          trees = pygame.transform.scale(trees, (2400, 1920))
+          rocksBoxes = pygame.image.load("Images/game map (image layers)/extras.png")
+          rocksBoxes = pygame.transform.scale(rocksBoxes, (2400, 1920))
           playerUsedShop = False
-          boss.move_towards_player(player, camera_x, camera_y)
-          boss.render(screen, camera_x, camera_y)
 
-          if (
-            player.x < boss.map_x + boss.size
-            and player.x + player.width > boss.map_x
-            and player.y < boss.map_y + boss.size
-            and player.y + player.height > boss.map_y
-            and action == 8  # Check if the player is attacking
-          ):
-            boss.health -= player_strength  # Decrease enemy health on collision
-            if boss.health <= 0:
-                enemies.remove(boss)  # Remove enemy instance if health reaches 0
-                coinAmount = 500
-                for i in range(coinAmount):
-                  coin = Coin(1, "Images/Items/coin.png", position=(boss.map_x + random.randint(1,10), boss.map_y + random.randint(1, 20)))
-                  enemyCoins.append(coin)
-                print("Game Complete")
-
-          # Check for enemy-player collision and update health
-          current_time = pygame.time.get_ticks()
-          if (
-            player.x < boss.map_x + boss.size
-            and player.x + player.width > boss.map_x
-            and player.y < boss.map_y + boss.size
-            and player.y + player.height > boss.map_y
-            and current_time - last_enemy_attack >= enemy_attack_cooldown
-          ):
-            player_health -= 15  # Decrease player health on collision
-
-          for coin in enemyCoins:
-          # Checks if the coordinates of the player and coin instance are overlapping
+          if boss.health > 0:
+            boss.move_towards_player(player, camera_x, camera_y)
+            boss.render(screen, camera_x, camera_y)
+            
+            # Update health bar position with respect to the boss
+            boss_health_bar_x = boss.map_x - camera_x - 13
+            boss_health_bar_y = boss.map_y - camera_y - 13
+            # Draw the health bar
+            draw_health_bar(screen, boss_health_bar_x, boss_health_bar_y, boss.health)
+  
             if (
-              player.x < coin.rect.x + coin.rect.width
-              and player.x + player.width > coin.rect.x
-              and player.y < coin.rect.y + coin.rect.height
-              and player.y + player.height > coin.rect.y
+              player.x < boss.map_x + boss.size
+              and player.x + player.width > boss.map_x
+              and player.y < boss.map_y + boss.size
+              and player.y + player.height > boss.map_y
+              and action == 8  # Check if the player is attacking
             ):
-          # Player picked up the coin, add its value to the player's coin counter
-              player.coins += coin.value
-              # Remove the coin from the list
-              enemyCoins.remove(coin)
-            coin.update()
-            coin.render(screen, camera_x, camera_y)
+              boss.health -= player_strength  # Decrease boss health on collision
+              
+              if boss.health <= 0:
+                  bossArray.remove(boss)
+                  coinAmount = 500
+                  for i in range(coinAmount):
+                    coin = Coin(1, "Images/Items/coin.png", position=(boss.map_x + random.randint(1,10), boss.map_y + random.randint(1, 20)))
+                    enemyCoins.append(coin)
+                  print("Game Complete")
+              
+  
+            # Check for enemy-player collision and update health
+            current_time = pygame.time.get_ticks()
+            enemy_attack_cooldown = 30000  # Cooldown for enemy attacks in milliseconds
+            if (
+              player.x < boss.map_x + boss.size
+              and player.x + player.width > boss.map_x
+              and player.y < boss.map_y + boss.size
+              and player.y + player.height > boss.map_y
+              and current_time - last_enemy_attack >= enemy_attack_cooldown
+            ):
+              player_health -= 15  # Decrease player health on collision
+              last_enemy_attack = current_time  # Update last attack time
+  
+            for coin in enemyCoins:
+            # Checks if the coordinates of the player and coin instance are overlapping
+              if (
+                player.x < coin.rect.x + coin.rect.width
+                and player.x + player.width > coin.rect.x
+                and player.y < coin.rect.y + coin.rect.height
+                and player.y + player.height > coin.rect.y
+              ):
+            # Player picked up the coin, add its value to the player's coin counter
+                player.coins += coin.value
+                # Remove the coin from the list
+                enemyCoins.remove(coin)
+              coin.update()
+              coin.render(screen, camera_x, camera_y)
 
         # Adjust the camera position to follow the player
         camera_x = player.x - (screen.get_width() // 2)
