@@ -165,9 +165,13 @@ def credits():
   while running:
       screen.fill((0,190,255))
 
-      draw_text('CREDITS SCREEN', font, (255, 255, 255), screen, 300, 20)
-      draw_text('(ASSETS CREDITS)', font, (255, 255, 255), screen, 304, 100)
-      draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 180)
+      draw_text('CREDITS SCREEN', font, (255, 255, 255), screen, 300, 10)
+      draw_text('GAME BY:', font, (255, 255, 255), screen, 300, 50)
+      draw_text('Natalie O Callaghan', font, (255, 255, 255), screen, 300, 80)
+      draw_text('Charlie Glover', font, (255, 255, 255), screen, 300, 110)
+      draw_text('Archie Farrell', font, (255, 255, 255), screen, 300, 140)
+      draw_text('(ASSETS CREDITS)', font, (255, 255, 255), screen, 304, 200)
+      draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 250)
 
       for event in pygame.event.get():
         if event.type == QUIT:
@@ -573,7 +577,8 @@ def controls(mx,my):
         draw_text('DOWN - S', font, (255, 255, 255), screen, 352, 120)
         draw_text('LEFT - A', font, (255, 255, 255), screen, 352, 140)
         draw_text('RIGHT - D', font, (255, 255, 255), screen, 352, 160)
-        draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 180)
+        draw_text('ATTACK - SPACEBAR', font, (255, 255, 255), screen, 352, 180)
+        draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 200)
 
         for event in pygame.event.get():
           if event.type == QUIT:
