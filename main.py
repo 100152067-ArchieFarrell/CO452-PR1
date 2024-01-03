@@ -67,9 +67,7 @@ click = False
 def main_menu():
     click = False
     while True:
-        screen.fill((0,190,255))
-        draw_text('Main Menu', font, (0,0,0), screen, 350, 250)
-
+        screen.blit(pygame.image.load('Images/title screen bg.png'), (0,0))
         mx, my = pygame.mouse.get_pos()
 
         # Creates the buttons on the screen
@@ -80,7 +78,8 @@ def main_menu():
         # Functions that will be run when a certain button is clicked
         if button_1.collidepoint((mx, my)):
             if click:
-                game(last_update, frame, action, Player, enemies)
+                player_score = 0
+                game(last_update, frame, action, Player, enemies, player_score)
         if button_2.collidepoint((mx, my)):
             if click:
                 controls(mx,my)
@@ -112,30 +111,69 @@ def main_menu():
         pygame.display.update()
         mainClock.tick(60)
 
-def gameOver():
+def gameOver(player_score):
   click = False
   # Game over variables
   game_over_font = pygame.font.SysFont(None, 50)
   game_over_text = game_over_font.render('Game Over', True, (255, 0, 0))
-  try_again_button = pygame.Rect(300, 280, 200, 50)
-  main_menu_button = pygame.Rect(300, 340, 200, 50)
-  quit_button = pygame.Rect(300, 400, 200, 50)
+  try_again_button = pygame.Rect(300, 340, 200, 50)
+  main_menu_button = pygame.Rect(300, 400, 200, 50)
+  quit_button = pygame.Rect(300, 460, 200, 50)
   while True:
-      screen.fill((0,190,255))
+      screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
       screen.blit(game_over_text, (300, 220))
       pygame.draw.rect(screen, (255, 0, 0), try_again_button)
       pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
       pygame.draw.rect(screen, (255, 0, 0), quit_button)
-
-      draw_text('Try Again', font, (255, 255, 255), screen, 345, 298)
-      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 358)
-      draw_text('Quit', font, (255, 255, 255), screen, 370, 418)
+      draw_text(f'Score: {player_score}', font, (255, 255, 255), screen, 340, 298)
+      draw_text('Try Again', font, (255, 255, 255), screen, 345, 358)
+      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 418)
+      draw_text('Quit', font, (255, 255, 255), screen, 370, 478)
 
       mx, my = pygame.mouse.get_pos()
 
       if try_again_button.collidepoint((mx, my)):
           if click:
-              game(last_update, frame, action, Player, enemies)
+              game(last_update, frame, action, Player, enemies, player_score)
+
+      if main_menu_button.collidepoint((mx, my)):
+          if click:
+              # Return to the main menu
+              main_menu()
+
+      if quit_button.collidepoint((mx, my)):
+          if click:
+              # Quit the game
+              pygame.quit()
+              sys.exit()
+
+      for event in pygame.event.get():
+          if event.type == QUIT:
+              pygame.quit()
+              sys.exit()
+          if event.type == MOUSEBUTTONDOWN:
+              if event.button == 1:
+                  click = True
+
+      pygame.display.update()
+      mainClock.tick(60)
+
+def gameComplete(player_score):
+  click = False
+  game_complete_font = pygame.font.SysFont(None, 50)
+  game_complete_text = game_complete_font.render('Game Complete', True, (255, 0, 0))
+  main_menu_button = pygame.Rect(300, 340, 200, 50)
+  quit_button = pygame.Rect(300, 400, 200, 50)
+  while True:
+      screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
+      screen.blit(game_complete_text, (300, 220))
+      pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
+      pygame.draw.rect(screen, (255, 0, 0), quit_button)
+      draw_text(f'Score: {player_score}', font, (255, 255, 255), screen, 340, 298)
+      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 358)
+      draw_text('Quit', font, (255, 255, 255), screen, 370, 418)
+
+      mx, my = pygame.mouse.get_pos()
 
       if main_menu_button.collidepoint((mx, my)):
           if click:
@@ -163,7 +201,7 @@ def gameOver():
 def credits():
   running = True
   while running:
-      screen.fill((0,190,255))
+      screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
 
       draw_text('CREDITS SCREEN', font, (255, 255, 255), screen, 300, 10)
       draw_text('GAME BY:', font, (255, 255, 255), screen, 300, 50)
@@ -185,12 +223,13 @@ def credits():
       mainClock.tick(60)
       
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, Player, enemies):
+def game(last_update, frame, action, Player, enemies, player_score):
     mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
+    complete = False
     # loads the default image for the game's character
-    player = Player(1114, 915, 50, 50, 1, 250)
+    player = Player(1114, 915, 50, 50, 1, 250, 0)
     UI = UserInterface(player)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
@@ -238,7 +277,7 @@ def game(last_update, frame, action, Player, enemies):
     # Set up variables for combat
     player_health = 50  # Initial health of the player
     player_strength = 1 # Initial strength of the player
-    enemy_attack_cooldown = 30000  # Cooldown for enemy attacks in milliseconds
+    enemy_attack_cooldown = 15000  # Cooldown for enemy attacks in milliseconds
     
     enemyCoins = []
     last_enemy_attack = pygame.time.get_ticks()
@@ -249,6 +288,7 @@ def game(last_update, frame, action, Player, enemies):
     playerUsedShop = False
     level = 1
     while running:
+        player_score = player.score
         currentTime = pygame.time.get_ticks()
         screen.fill((0, 0, 0))
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
@@ -295,6 +335,7 @@ def game(last_update, frame, action, Player, enemies):
               enemy.health -= player_strength  # Decrease enemy health on collision
               if enemy.health <= 0:
                   enemies.remove(enemy)  # Remove enemy instance if health reaches 0
+                  player.score += 10  # Increase player score for killing an enemy
                   coinAmount = random.randint(1, 5)
                   for i in range(coinAmount):
                     coin = Coin(1, "Images/Items/coin.png", position=(enemy.map_x + random.randint(1,10), enemy.map_y + random.randint(1, 10)))
@@ -369,7 +410,10 @@ def game(last_update, frame, action, Player, enemies):
               if slot.rect.collidepoint((inventorymx, inventorymy)):
                   if slot.item and slot.item.name == "Health Potion" and player_health < 50 and slot.count > 0:
                     slot.count -= 1
-                    player_health += 15
+                    if player_health < 35:
+                      player_health += 15
+                    else:
+                      player_health = player_health + (50 - player_health)
                     print("Health Potion Used")
                     
                   if slot.item and slot.item.name == "Strength Potion" and player_strength < 5 and slot.count > 0:
@@ -473,6 +517,9 @@ def game(last_update, frame, action, Player, enemies):
           rocksBoxes = pygame.transform.scale(rocksBoxes, (2400, 1920))
           playerUsedShop = False
 
+          if complete == True and len(enemyCoins) == 0:
+            gameComplete(player_score)
+            
           if boss.health > 0:
             boss.move_towards_player(player, camera_x, camera_y)
             boss.render(screen, camera_x, camera_y)
@@ -494,13 +541,15 @@ def game(last_update, frame, action, Player, enemies):
               
               if boss.health <= 0:
                   bossArray.remove(boss)
+                  player.score += 100  # Increase player score for killing the boss
+                  player.score = round(player.score * (1+(player_health/10)))
                   coinAmount = 500
                   for i in range(coinAmount):
                     coin = Coin(1, "Images/Items/coin.png", position=(boss.map_x + random.randint(1,10), boss.map_y + random.randint(1, 20)))
                     enemyCoins.append(coin)
                   print("Game Complete")
+                  complete = True
               
-  
             # Check for enemy-player collision and update health
             current_time = pygame.time.get_ticks()
             enemy_attack_cooldown = 30000  # Cooldown for enemy attacks in milliseconds
@@ -541,7 +590,7 @@ def game(last_update, frame, action, Player, enemies):
         draw_health_bar(screen, health_bar_x, health_bar_y, player_health)
 
         if player_health <= 0:
-          if gameOver():
+          if gameOver(player_score):
               # Reset game state for a new try
               player_health = max_player_health
           else:
@@ -570,7 +619,7 @@ def game(last_update, frame, action, Player, enemies):
 def controls(mx,my):
     running = True
     while running:
-        screen.fill((0,190,255))
+        screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
 
         draw_text('CONTROLS SCREEN', font, (255, 255, 255), screen, 300, 20)
         draw_text('UP - W', font, (255, 255, 255), screen, 352, 100)

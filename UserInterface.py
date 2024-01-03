@@ -24,6 +24,7 @@ class UserInterface:
 
     def render(self, screen, mouse_pos):
       self.displayCoins(screen)
+      self.displayScore(screen)
 
       if self.inventoryRender == True:
           self.inventory.render(screen, mouse_pos)
@@ -42,3 +43,12 @@ class UserInterface:
 
           coinCounterSurface = self.regularfont.render(coinCounter, True, self.color_white)
           surface.blit(coinCounterSurface, (650, 10))
+
+    def displayScore(self, surface):
+      if hasattr(self.player, 'coins'):
+          scoreCounter = f'Score: {self.player.score}'
+          shadowSurface = self.regularfont.render(scoreCounter, True, self.color_black)
+          surface.blit(shadowSurface, (652, 32))
+
+          scoreCounterSurface = self.regularfont.render(scoreCounter, True, self.color_white)
+          surface.blit(scoreCounterSurface, (650, 30))
