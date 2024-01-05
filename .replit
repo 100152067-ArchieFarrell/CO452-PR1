@@ -6,5 +6,8 @@ audio = true
 
 hidden = [".pythonlibs"]
 
+# Stops the packager from guessing and auto-installing packages, but it still runs to install packages when running the Repl
+disableGuessImports = true
+
 [nix]
 channel = "stable-23_05"

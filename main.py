@@ -15,8 +15,11 @@ pygame.init()
 pygame.display.set_caption('The Whispers')
 screen = pygame.display.set_mode((800, 640),0,0)
 
-# Setting up the font that will be used
-font = pygame.font.SysFont(None, 30)
+# Setting up the fonts that will be used
+smallFont = pygame.font.Font("Fonts/PixeloidSans.ttf", 16)
+font = pygame.font.Font("Fonts/PixeloidSans.ttf", 24)
+boldFont = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 24)
+titleFont = pygame.font.Font("Fonts/PixeloidSans-Bold.ttf", 26)
 
 # Setting up the enemy
 enemies = []
@@ -39,7 +42,7 @@ sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
 
 # List of animations and variables which will be used for updating the player's animation
 animation_list = []
-animation_steps = [6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 3, 3]
+animation_steps = [6, 6, 6, 6, 6, 6, 6, 6, 4, 4, 4, 4, 3, 3]
 action = 0 
 last_update = pygame.time.get_ticks()
 animation_cooldown = 500
@@ -71,29 +74,45 @@ def main_menu():
         mx, my = pygame.mouse.get_pos()
 
         # Creates the buttons on the screen
-        button_1 = pygame.Rect(300, 280, 200, 50)
-        button_2 = pygame.Rect(300, 340, 200, 50)
-        button_3 = pygame.Rect(300, 400, 200, 50)
+        playButton = pygame.Rect(300, 280, 200, 50)
+        playButtonBorder = playButton.inflate(2,2)
+        controlsButton = pygame.Rect(300, 340, 200, 50)
+        controlsButtonBorder = controlsButton.inflate(2,2)
+        creditsButton = pygame.Rect(300, 400, 200, 50)
+        creditsButtonBorder = creditsButton.inflate(2,2)
+
+        pygame.draw.rect(screen, (156, 29, 43), playButton)
+        pygame.draw.rect(screen, (83, 10, 20), playButtonBorder, 4, 4)
+        pygame.draw.rect(screen, (156, 29, 43), controlsButton)
+        pygame.draw.rect(screen, (83, 10, 20), controlsButtonBorder, 4, 4)
+        pygame.draw.rect(screen, (156, 29, 43), creditsButton)
+        pygame.draw.rect(screen, (83, 10, 20), creditsButtonBorder, 4, 4)
+
+        # Text that will be displayed on the buttons
+        draw_text('PLAY', font, (255,255,255), screen, 369, 291)
+        draw_text('CONTROLS', font, (255,255,255), screen, 336, 351)
+        draw_text('CREDITS', font, (255,255,255), screen, 348, 411)
 
         # Functions that will be run when a certain button is clicked
-        if button_1.collidepoint((mx, my)):
+        if playButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (146, 19, 23), playButton)
+            pygame.draw.rect(screen, (73, 0, 10), playButtonBorder, 4, 4)
+            draw_text('PLAY', font, (215,215,215), screen, 369, 291)
             if click:
                 player_score = 0
                 game(last_update, frame, action, Player, enemies, player_score)
-        if button_2.collidepoint((mx, my)):
+        if controlsButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (146, 19, 23), controlsButton)
+            pygame.draw.rect(screen, (73, 0, 10), controlsButtonBorder, 4, 4)
+            draw_text('CONTROLS', font, (215,215,215), screen, 336, 351)
             if click:
-                controls(mx,my)
-        if button_3.collidepoint((mx, my)):
+                controls(mx,my, last_update, frame, action)
+        if creditsButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (146, 19, 23), creditsButton)
+            pygame.draw.rect(screen, (73, 0, 10), creditsButtonBorder, 4, 4)
+            draw_text('CREDITS', font, (215,215,215), screen, 348, 411)
             if click:
                 credits()
-        pygame.draw.rect(screen, (255, 0, 0), button_1)
-        pygame.draw.rect(screen, (255, 0, 0), button_2)
-        pygame.draw.rect(screen, (255, 0, 0), button_3)
-
-        # Text that will be displayed on the buttons
-        draw_text('PLAY', font, (255,255,255), screen, 376, 298)
-        draw_text('CONTROLS', font, (255,255,255), screen, 343, 358)
-        draw_text('CREDITS', font, (255,255,255), screen, 358, 418)
 
         click = False
         for event in pygame.event.get():
@@ -113,35 +132,49 @@ def main_menu():
 
 def gameOver(player_score):
   click = False
-  # Game over variables
-  game_over_font = pygame.font.SysFont(None, 50)
-  game_over_text = game_over_font.render('Game Over', True, (255, 0, 0))
-  try_again_button = pygame.Rect(300, 340, 200, 50)
-  main_menu_button = pygame.Rect(300, 400, 200, 50)
-  quit_button = pygame.Rect(300, 460, 200, 50)
   while True:
       screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
-      screen.blit(game_over_text, (300, 220))
-      pygame.draw.rect(screen, (255, 0, 0), try_again_button)
-      pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
-      pygame.draw.rect(screen, (255, 0, 0), quit_button)
-      draw_text(f'Score: {player_score}', font, (255, 255, 255), screen, 340, 298)
-      draw_text('Try Again', font, (255, 255, 255), screen, 345, 358)
-      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 418)
-      draw_text('Quit', font, (255, 255, 255), screen, 370, 478)
+      tryAgainButton = pygame.Rect(300, 340, 200, 50)
+      tryAgainButtonBorder = tryAgainButton.inflate(2,2)
+      mainMenuButton = pygame.Rect(300, 400, 200, 50)
+      mainMenuButtonBorder = mainMenuButton.inflate(2,2)
+      quitButton = pygame.Rect(300, 460, 200, 50)
+      quitButtonBorder = quitButton.inflate(2,2)
+  
+      pygame.draw.rect(screen, (156, 29, 43), tryAgainButton)
+      pygame.draw.rect(screen, (83, 10, 20), tryAgainButtonBorder, 4, 4)
+      pygame.draw.rect(screen, (156, 29, 43), mainMenuButton)
+      pygame.draw.rect(screen, (83, 10, 20), mainMenuButtonBorder, 4, 4)
+      pygame.draw.rect(screen, (156, 29, 43), quitButton)
+      pygame.draw.rect(screen, (83, 10, 20), quitButtonBorder, 4, 4)
+
+      draw_text('GAME OVER', titleFont, (255,255,255), screen, 308, 110)
+      draw_text(f'SCORE: {player_score}', boldFont, (255, 255, 255), screen, 320, 218)
+      draw_text('TRY AGAIN', font, (255, 255, 255), screen, 335, 352)
+      draw_text('MAIN MENU', font, (255, 255, 255), screen, 328, 410)
+      draw_text('QUIT', font, (255, 255, 255), screen, 372, 472)
 
       mx, my = pygame.mouse.get_pos()
 
-      if try_again_button.collidepoint((mx, my)):
+      if tryAgainButton.collidepoint((mx, my)):
+          pygame.draw.rect(screen, (146, 19, 23), tryAgainButton)
+          pygame.draw.rect(screen, (73, 0, 10), tryAgainButtonBorder, 4, 4)
+          draw_text('TRY AGAIN', font, (215,215,215), screen, 335, 352)
           if click:
               game(last_update, frame, action, Player, enemies, player_score)
 
-      if main_menu_button.collidepoint((mx, my)):
+      if mainMenuButton.collidepoint((mx, my)):
+          pygame.draw.rect(screen, (146, 19, 23), mainMenuButton)
+          pygame.draw.rect(screen, (73, 0, 10), mainMenuButtonBorder, 4, 4)
+          draw_text('MAIN MENU', font, (215,215,215), screen, 328, 410)
           if click:
               # Return to the main menu
               main_menu()
 
-      if quit_button.collidepoint((mx, my)):
+      if quitButton.collidepoint((mx, my)):
+          pygame.draw.rect(screen, (146, 19, 23), quitButton)
+          pygame.draw.rect(screen, (73, 0, 10), quitButtonBorder, 4, 4)
+          draw_text('QUIT', font, (215,215,215), screen, 372, 472)
           if click:
               # Quit the game
               pygame.quit()
@@ -159,43 +192,53 @@ def gameOver(player_score):
       mainClock.tick(60)
 
 def gameComplete(player_score):
-  click = False
-  game_complete_font = pygame.font.SysFont(None, 50)
-  game_complete_text = game_complete_font.render('Game Complete', True, (255, 0, 0))
-  main_menu_button = pygame.Rect(300, 340, 200, 50)
-  quit_button = pygame.Rect(300, 400, 200, 50)
-  while True:
-      screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
-      screen.blit(game_complete_text, (300, 220))
-      pygame.draw.rect(screen, (255, 0, 0), main_menu_button)
-      pygame.draw.rect(screen, (255, 0, 0), quit_button)
-      draw_text(f'Score: {player_score}', font, (255, 255, 255), screen, 340, 298)
-      draw_text('Main Menu', font, (255, 255, 255), screen, 342, 358)
-      draw_text('Quit', font, (255, 255, 255), screen, 370, 418)
+    click = False
+    while True:
+        screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
+        mainMenuButton = pygame.Rect(300, 340, 200, 50)
+        mainMenuButtonBorder = mainMenuButton.inflate(2,2)
+        quitButton = pygame.Rect(300, 400, 200, 50)
+        quitButtonBorder = quitButton.inflate(2,2)
 
-      mx, my = pygame.mouse.get_pos()
+        pygame.draw.rect(screen, (156, 29, 43), mainMenuButton)
+        pygame.draw.rect(screen, (83, 10, 20), mainMenuButtonBorder, 4, 4)
+        pygame.draw.rect(screen, (156, 29, 43), quitButton)
+        pygame.draw.rect(screen, (83, 10, 20), quitButtonBorder, 4, 4)
 
-      if main_menu_button.collidepoint((mx, my)):
-          if click:
-              # Return to the main menu
-              main_menu()
+        draw_text('GAME COMPLETE', titleFont, (255,255,255), screen, 270, 110)
+        draw_text(f'SCORE: {player_score}', boldFont, (255, 255, 255), screen, 320, 218)
+        draw_text('MAIN MENU', font, (255, 255, 255), screen, 328, 350)
+        draw_text('QUIT', font, (255, 255, 255), screen, 372, 410)
 
-      if quit_button.collidepoint((mx, my)):
-          if click:
-              # Quit the game
-              pygame.quit()
-              sys.exit()
+        mx, my = pygame.mouse.get_pos()
 
-      for event in pygame.event.get():
-          if event.type == QUIT:
-              pygame.quit()
-              sys.exit()
-          if event.type == MOUSEBUTTONDOWN:
-              if event.button == 1:
-                  click = True
+        if mainMenuButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (146, 19, 23), mainMenuButton)
+            pygame.draw.rect(screen, (73, 0, 10), mainMenuButtonBorder, 4, 4)
+            draw_text('MAIN MENU', font, (215,215,215), screen, 328, 350)
+            if click:
+                # Return to the main menu
+                main_menu()
 
-      pygame.display.update()
-      mainClock.tick(60)
+        if quitButton.collidepoint((mx, my)):
+            pygame.draw.rect(screen, (146, 19, 23), quitButton)
+            pygame.draw.rect(screen, (73, 0, 10), quitButtonBorder, 4, 4)
+            draw_text('QUIT', font, (215,215,215), screen, 372, 410)
+            if click:
+                # Quit the game
+                pygame.quit()
+                sys.exit()
+
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    click = True
+
+        pygame.display.update()
+        mainClock.tick(60)
 
 # This function is called when the "CREDITS" button is clicked.
 def credits():
@@ -203,13 +246,15 @@ def credits():
   while running:
       screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
 
-      draw_text('CREDITS SCREEN', font, (255, 255, 255), screen, 300, 10)
-      draw_text('GAME BY:', font, (255, 255, 255), screen, 300, 50)
-      draw_text('Natalie O Callaghan', font, (255, 255, 255), screen, 300, 80)
-      draw_text('Charlie Glover', font, (255, 255, 255), screen, 300, 110)
-      draw_text('Archie Farrell', font, (255, 255, 255), screen, 300, 140)
-      draw_text('(ASSETS CREDITS)', font, (255, 255, 255), screen, 304, 200)
-      draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 250)
+      draw_text('CREDITS SCREEN', titleFont, (255, 255, 255), screen, 266, 70)
+      draw_text('GAME BY:', boldFont, (255, 255, 255), screen, 275, 130)
+      draw_text('Natalie O Callaghan', font, (255, 255, 255), screen, 275, 170)
+      draw_text('Charlie Glover', font, (255, 255, 255), screen, 275, 210)
+      draw_text('Archie Farrell', font, (255, 255, 255), screen, 275, 250)
+      draw_text('ASSETS BY:', boldFont, (255, 255, 255), screen, 275, 310)
+      draw_text('(asset credits)', font, (255, 255, 255), screen, 275, 350)
+
+      draw_text('PRESS "ESC" TO GO BACK', boldFont, (255, 255, 255), screen, 212, 540)
 
       for event in pygame.event.get():
         if event.type == QUIT:
@@ -449,15 +494,15 @@ def game(last_update, frame, action, Player, enemies, player_score):
           # Buttons for items
           healthPotionButton = pygame.Rect(20, 90, 200, 40)
           pygame.draw.rect(screen, (30, 0, 120), healthPotionButton)
-          draw_text('Buy Health Potion', font, (255, 255, 255), screen, 30, 100)
+          draw_text('Buy Health Potion', smallFont, (255, 255, 255), screen, 30, 100)
 
           strengthPotionButton = pygame.Rect(230, 90, 230, 40)
           pygame.draw.rect(screen, (30, 10, 120), strengthPotionButton)
-          draw_text('Buy Strength Potion', font, (255, 255, 255), screen, 240, 100)
+          draw_text('Buy Strength Potion', smallFont, (255, 255, 255), screen, 240, 100)
 
           keyButton = pygame.Rect(470, 90, 120, 40)
           pygame.draw.rect(screen, (30, 20, 120), keyButton)
-          draw_text('Buy Key', font, (255, 255, 255), screen, 490, 100)
+          draw_text('Buy Key', smallFont, (255, 255, 255), screen, 490, 100)
 
           # Check if the player clicks on the shop item
           shopmx, shopmy = pygame.mouse.get_pos()
@@ -616,18 +661,56 @@ def game(last_update, frame, action, Player, enemies, player_score):
         mainClock.tick(60)
 
 # This function is called when the "Controls" button is clicked.
-def controls(mx,my):
+def controls(mx,my, last_update, frame, action):
     running = True
+    viewInventory = False
     while running:
         screen.blit(pygame.image.load('Images/screen bg.png'), (0,0))
 
-        draw_text('CONTROLS SCREEN', font, (255, 255, 255), screen, 300, 20)
-        draw_text('UP - W', font, (255, 255, 255), screen, 352, 100)
-        draw_text('DOWN - S', font, (255, 255, 255), screen, 352, 120)
-        draw_text('LEFT - A', font, (255, 255, 255), screen, 352, 140)
-        draw_text('RIGHT - D', font, (255, 255, 255), screen, 352, 160)
-        draw_text('ATTACK - SPACEBAR', font, (255, 255, 255), screen, 352, 180)
-        draw_text('PRESS "ESC" TO GO BACK', font, (255, 255, 255), screen, 272, 200)
+        draw_text('CONTROLS SCREEN', titleFont, (255, 255, 255), screen, 253, 70)
+        draw_text('UP - W', font, (255, 255, 255), screen, 275, 130)
+        draw_text('DOWN - S', font, (255, 255, 255), screen, 275, 170)
+        draw_text('LEFT - A', font, (255, 255, 255), screen, 275, 210)
+        draw_text('RIGHT - D', font, (255, 255, 255), screen, 275, 250)
+        draw_text('ATTACK - SPACEBAR', font, (255, 255, 255), screen, 275, 290)
+        draw_text('INVENTORY - E', font, (255, 255, 255), screen, 275, 330)
+        
+        draw_text('PRESS "ESC" TO GO BACK', boldFont, (255, 255, 255), screen, 212, 540)
+
+      # animation
+        current_time = pygame.time.get_ticks()
+        if current_time - last_update >= animation_cooldown:
+          frame += 1
+          last_update = current_time
+          if frame >= len(animation_list[action]):
+            frame = 0
+
+        if frame < 0 or frame >= len(animation_list[action]):
+          frame = 0  # Set the default frame if it's out of range
+          
+        screen.blit(animation_list[action][frame],(340, 360))
+        
+        key = pygame.key.get_pressed()
+
+        if key[pygame.K_a] == True:
+          action = 6
+        elif key[pygame.K_d] == True:
+          action = 5
+        elif key[pygame.K_w] == True:
+          action = 7
+        elif key[pygame.K_s] == True:
+          action = 4
+        elif key[pygame.K_SPACE] == True:
+          action = 8
+        elif key[pygame.K_e] == True:
+          viewInventory = not viewInventory
+        else:
+          action=0
+
+        if viewInventory == True:
+          inventory = pygame.image.load("Images/Inventory.png")
+          inventory = pygame.transform.scale(inventory, (160, 188))
+          screen.blit(inventory, (306, 354))
 
         for event in pygame.event.get():
           if event.type == QUIT:
