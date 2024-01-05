@@ -4,16 +4,16 @@ from pygame.locals import *
 from UserInterface import UserInterface
 from InventorySlot import InventorySlot
 from healthBar import *
-from enemy import *
-from player import *
 from coin import Coin
 import spritesheet
+from player import *
 
 # Setting up the environment to initialize pygame
 mainClock = pygame.time.Clock()
 pygame.init()
 pygame.display.set_caption('The Whispers')
 screen = pygame.display.set_mode((800, 640),0,0)
+from enemy import *
 
 # Setting up the fonts that will be used
 smallFont = pygame.font.Font("Fonts/PixeloidSans.ttf", 16)
@@ -52,7 +52,7 @@ step_counter = 0
 for animation in animation_steps:
   temp_img_list = []
   for _ in range(animation):
-    temp_img_list.append(sprite_sheet.get_image(step_counter, 48, 64, 2, (17, 55, 4)))
+    temp_img_list.append(sprite_sheet.get_image(step_counter, 48, 32, 2, (17, 55, 4)))
     step_counter += 1
   animation_list.append(temp_img_list)
 
@@ -357,7 +357,7 @@ def game(last_update, frame, action, Player, enemies, player_score):
         if frame < 0 or frame >= len(animation_list[action]):
           frame = 0  # Set the default frame if it's out of range
 
-        screen.blit(animation_list[action][frame],(362, 280))
+        screen.blit(animation_list[action][frame],(362, 312))
 
         # enemy spawning
         if playerUsedShop == True:
@@ -367,8 +367,8 @@ def game(last_update, frame, action, Player, enemies, player_score):
             lastWaveTime = currentTime
 
         for enemy in enemies:
-          enemy.move_towards_player(player, camera_x, camera_y)
-          enemy.render(screen, camera_x, camera_y)
+          directionToGo = enemy.move_towards_player(player, camera_x, camera_y)
+          enemy.render(screen, camera_x, camera_y, action)
           # Check for player-enemy collision and update health
           if (
               player.x < enemy.map_x + enemy.size
@@ -567,7 +567,7 @@ def game(last_update, frame, action, Player, enemies, player_score):
             
           if boss.health > 0:
             boss.move_towards_player(player, camera_x, camera_y)
-            boss.render(screen, camera_x, camera_y)
+            boss.render(screen, camera_x, camera_y, action)
             
             # Update health bar position with respect to the boss
             boss_health_bar_x = boss.map_x - camera_x - 13
