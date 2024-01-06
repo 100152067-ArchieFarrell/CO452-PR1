@@ -367,8 +367,8 @@ def game(last_update, frame, action, Player, enemies, player_score):
             lastWaveTime = currentTime
 
         for enemy in enemies:
-          directionToGo = enemy.move_towards_player(player, camera_x, camera_y)
-          enemy.render(screen, camera_x, camera_y, action)
+          directionToGo = enemy.move_towards_player(player, camera_x, camera_y, level)
+          enemy.render(screen, camera_x, camera_y, action, level)
           # Check for player-enemy collision and update health
           if (
               player.x < enemy.map_x + enemy.size
@@ -566,12 +566,12 @@ def game(last_update, frame, action, Player, enemies, player_score):
             gameComplete(player_score)
             
           if boss.health > 0:
-            boss.move_towards_player(player, camera_x, camera_y)
-            boss.render(screen, camera_x, camera_y, action)
+            boss.move_towards_player(player, camera_x, camera_y, level)
+            boss.render(screen, camera_x, camera_y, action, level)
             
             # Update health bar position with respect to the boss
-            boss_health_bar_x = boss.map_x - camera_x - 13
-            boss_health_bar_y = boss.map_y - camera_y - 13
+            boss_health_bar_x = boss.map_x - camera_x + 54 
+            boss_health_bar_y = boss.map_y - camera_y + 18
             # Draw the health bar
             draw_health_bar(screen, boss_health_bar_x, boss_health_bar_y, boss.health)
   
@@ -590,7 +590,7 @@ def game(last_update, frame, action, Player, enemies, player_score):
                   player.score = round(player.score * (1+(player_health/10)))
                   coinAmount = 500
                   for i in range(coinAmount):
-                    coin = Coin(1, "Images/Items/coin.png", position=(boss.map_x + random.randint(1,10), boss.map_y + random.randint(1, 20)))
+                    coin = Coin(1, "Images/Items/coin.png",(boss.map_x + random.randint(20,40), boss.map_y + random.randint(20, 40)))
                     enemyCoins.append(coin)
                   print("Game Complete")
                   complete = True
