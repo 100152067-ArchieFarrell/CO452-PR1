@@ -36,7 +36,7 @@ def enemyWave(Enemy, player, camera_x, camera_y):
       enemies.append(enemy)
   return enemies
 
-# Loading the sprite sheets for animations
+# Loading the sprite sheets for player animations
 sprite_sheet_image = pygame.image.load('Images/player spritesheet.png').convert_alpha()
 sprite_sheet = spritesheet.SpriteSheet(sprite_sheet_image)
 
@@ -56,12 +56,45 @@ for animation in animation_steps:
     step_counter += 1
   animation_list.append(temp_img_list)
 
+# Loading the sprite sheets for shopkeeper animations
+skSpriteSheetImage = pygame.image.load('Images/shopkeeper spritesheet.png').convert_alpha()
+skSpriteSheet = spritesheet.SpriteSheet(skSpriteSheetImage)
+
+# List of animations and variables which will be used for updating the shopkeeper's animation
+skAnimationList = []
+skAnimationSteps = [2, 2, 2, 2, 2]
+skAction = 0 
+skLastUpdate = pygame.time.get_ticks()
+animation_cooldown = 500
+skFrame = 0
+step_counter = 0
+
+for animation in skAnimationSteps:
+  skTempImgList = []
+  for _ in range(animation):
+    skTempImgList.append(skSpriteSheet.get_image(step_counter, 48, 32, 2, (24, 0, 20)))
+    step_counter += 1
+  skAnimationList.append(skTempImgList)
+
 # Function to write text on the screen and buttons
 def draw_text(text, font, color, surface, x, y):
     textobj = font.render(text, 1, color)
     textrect = textobj.get_rect()
     textrect.topleft = (x, y)
     surface.blit(textobj, textrect)
+
+def chat():
+  chatBG = pygame.Rect(0, 0, 800, 150)
+  pygame.draw.rect(screen, (10, 10, 10), chatBG)
+
+  chatBox = pygame.Rect(10, 10, 620, 130)
+  pygame.draw.rect(screen, (20, 20, 20), chatBox)
+
+  chatBoxTop = pygame.Rect(10, 10, 620, 10)
+  pygame.draw.rect(screen, (30, 30, 30), chatBoxTop)
+
+  chatImageBox = pygame.Rect(640, 10, 150, 130)
+  pygame.draw.rect(screen, (50, 50, 50), chatImageBox)
 
 # A variable to check for the status later
 click = False
@@ -100,7 +133,7 @@ def main_menu():
             draw_text('PLAY', font, (215,215,215), screen, 369, 291)
             if click:
                 player_score = 0
-                game(last_update, frame, action, Player, enemies, player_score)
+                game(last_update, frame, action, Player, enemies, player_score, skAction, skFrame, skLastUpdate)
         if controlsButton.collidepoint((mx, my)):
             pygame.draw.rect(screen, (146, 19, 23), controlsButton)
             pygame.draw.rect(screen, (73, 0, 10), controlsButtonBorder, 4, 4)
@@ -161,7 +194,7 @@ def gameOver(player_score):
           pygame.draw.rect(screen, (73, 0, 10), tryAgainButtonBorder, 4, 4)
           draw_text('TRY AGAIN', font, (215,215,215), screen, 335, 352)
           if click:
-              game(last_update, frame, action, Player, enemies, player_score)
+              game(last_update, frame, action, Player, enemies, player_score, skAction, skFrame, skLastUpdate)
 
       if mainMenuButton.collidepoint((mx, my)):
           pygame.draw.rect(screen, (146, 19, 23), mainMenuButton)
@@ -268,18 +301,26 @@ def credits():
       mainClock.tick(60)
       
 # This function is called when the "PLAY" button is clicked.
-def game(last_update, frame, action, Player, enemies, player_score):
+def game(last_update, frame, action, Player, enemies, player_score, skAction, skFrame, skLastUpdate):
     mouse_pos = (0, 0)
     # sets the running state of the game to "true"
     running = True
+    hasKey = False
     complete = False
+    inCutscene = True
+    inFirstCutscene = True
+    inSecondCutscene = False
+    inThirdCutscene = True
+    inFourthCutscene = False
+    cutscenesComplete = False
+    textCounter = 0
     # loads the default image for the game's character
     player = Player(1114, 915, 50, 50, 1, 250, 0)
     UI = UserInterface(player)
     player_image = pygame.image.load('Images/frank.png')
     player_image = pygame.transform.scale(player_image, (26, 42))
     # enemy image
-    boss = Enemy(1200, 1000, 50, 4, 50, "player_image.png")
+    boss = Enemy(1000, 800, 50, 4, 50, "player_image.png")
     bossArray = []
     bossArray.append(boss)
     enemy_image = pygame.image.load('Images/zombie.jpg')
@@ -339,6 +380,19 @@ def game(last_update, frame, action, Player, enemies, player_score):
         screen.blit(ground, (0 - camera_x, 0 - camera_y))
         screen.blit(dungeon, (0 - camera_x, 0 - camera_y))
         if level == 1:
+          # shopkeeper animation
+          skCurrentTime = pygame.time.get_ticks()
+          if skCurrentTime - skLastUpdate >= animation_cooldown:
+            skFrame += 1
+            skLastUpdate = skCurrentTime
+            if skFrame >= len(skAnimationList[skAction]):
+              skFrame = 0
+
+          if skFrame < 0 or skFrame >= len(skAnimationList[skAction]):
+            skFrame = 0  # Set the default frame if it's out of range
+          
+          skAction = 0
+          screen.blit(skAnimationList[skAction][skFrame],(634 - camera_x, 538 - camera_y))
           screen.blit(shop, (0 - camera_x, 0 - camera_y))
 
         key = pygame.key.get_pressed()
@@ -346,7 +400,7 @@ def game(last_update, frame, action, Player, enemies, player_score):
       # Save the current position for boundary checking
         player_x, player_y = player.x, player.y
 
-      # animation
+      # player animation
         current_time = pygame.time.get_ticks()
         if current_time - last_update >= animation_cooldown:
           frame += 1
@@ -358,7 +412,7 @@ def game(last_update, frame, action, Player, enemies, player_score):
           frame = 0  # Set the default frame if it's out of range
 
         screen.blit(animation_list[action][frame],(362, 312))
-
+          
         # enemy spawning
         if playerUsedShop == True:
           if currentTime - lastWaveTime >= waveInterval and enemies == []:
@@ -420,31 +474,154 @@ def game(last_update, frame, action, Player, enemies, player_score):
         screen.blit(rocksBoxes, (0 - camera_x, 0 - camera_y))
         if spawnerWalls_visible:
           screen.blit(spawnerWalls, (0 - camera_x, 0 - camera_y))
+        ## Cutscenes
+        # First 'cutscene'
+        if inFirstCutscene == True:
+          inCutscene = True
+          cutscenemx, cutscenemy = pygame.mouse.get_pos()
+          cutsceneClick = pygame.mouse.get_pressed()
+          chat()
+          continueButton = pygame.Rect(500, 90, 120, 40)
+          pygame.draw.rect(screen, (30, 20, 120), continueButton)
+          draw_text('Continue', smallFont, (255, 255, 255), screen, 522, 100)
+          cutsceneText = ["This is Frank.", "", "He's currently stuck in the middle of a forest, searching", "for a 'long lost treasure' after hearing some whispers about it.", "They led him right here. Surely after all of this travelling,", "the treasure must be closeby now."]
+          
+          screen.blit(animation_list[action][frame],(666, 60))
 
-        if key[pygame.K_a] == True and player.x > boundary_left:
-            action = 6
-            #player.x -= 8
-            player.x -= 20
-        elif key[pygame.K_d] == True and player.x < boundary_right:
-            action = 5
-            #player.x += 8
-            player.x += 20
-        elif key[pygame.K_w] == True and player.y > boundary_top:
-            action = 7
-            #player.y -= 8
-            player.y -= 20
-        elif key[pygame.K_s] == True and player.y < boundary_bottom:
-            action = 4
-            #player.y += 8
-            player.y += 20
-        elif key[pygame.K_SPACE] == True:
-            action = 8
-        elif key[pygame.K_SPACE] and key[pygame.K.s] == True:
-            action = 9
-        elif key[pygame.K_e] == True:
-          UI.toggleInventory()
-        else:
-          action=0
+          draw_text(cutsceneText[textCounter], smallFont, (255, 255, 255), screen, 24, 30)
+
+          draw_text(cutsceneText[textCounter+1], smallFont, (255, 255, 255), screen, 24, 50)
+
+          if continueButton.collidepoint((cutscenemx, cutscenemy)):
+            pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
+            if cutsceneClick[0] == 1:
+              textCounter = textCounter + 2
+          
+          if textCounter > 4:
+            inFirstCutscene = False
+            inCutscene = False
+            textCounter = 0
+
+        # Second 'cutscene'
+        if inSecondCutscene == True:
+          inCutscene = True
+          cutscenemx, cutscenemy = pygame.mouse.get_pos()
+          cutsceneClick = pygame.mouse.get_pressed()
+          chat()
+          continueButton = pygame.Rect(500, 90, 120, 40)
+          pygame.draw.rect(screen, (30, 20, 120), continueButton)
+          draw_text('Continue', smallFont, (255, 255, 255), screen, 522, 100)
+          cutsceneText = ["Hey there! Strange seeing someone around here for once...", "Who might you be?", "Frank.", "", "Hi Frank, I'm Sven. I've been running this shop round here for", "many years...","I suppose you're looking for the treasure, huh?", "", "Yes.", "", "Well, I have just the thing for you! Here in stock, I have the key", "to the dungeon where the treasure is kept!", "However, as the treasure has never actually been found, I do", "require a deposit on the key.", "... Why can't you just go into the dungeon yourself if you have", "the key?", "Well, you see.. I'm actually stuck in place.", "Also I'm safe in my little stall, no monsters can get me from in here.","Oh yeah, the monsters. Hoards of them like to roam around and", "attack anyone they can find.", "The walls only stay up for so long unfortunately, then they won't", "stop coming back..", "Anyway! Have fun, come back to me if you want to purchase", "any items :)"]
+          if textCounter == 2 or textCounter == 8 or textCounter == 14:
+            screen.blit(animation_list[0][frame],(666, 60))
+          else:
+            screen.blit(skAnimationList[skAction][skFrame],(682, 60))
+
+          draw_text(cutsceneText[textCounter], smallFont, (255, 255, 255), screen, 24, 30)
+
+          draw_text(cutsceneText[textCounter+1], smallFont, (255, 255, 255), screen, 24, 50)
+
+          if continueButton.collidepoint((cutscenemx, cutscenemy)):
+            pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
+            if cutsceneClick[0] == 1:
+              textCounter = textCounter + 2
+
+          if textCounter > 20:
+            inSecondCutscene = False
+            inCutscene = False
+            playerUsedShop = True
+            textCounter = 0
+
+        # Third 'cutscene'
+        if inThirdCutscene == True and level == 2:
+          inCutscene = True
+          cutscenemx, cutscenemy = pygame.mouse.get_pos()
+          cutsceneClick = pygame.mouse.get_pressed()
+          chat()
+          continueButton = pygame.Rect(500, 90, 120, 40)
+          pygame.draw.rect(screen, (30, 20, 120), continueButton)
+          draw_text('Continue', smallFont, (255, 255, 255), screen, 522, 100)
+          cutsceneText = ["Well this is spacious...", "Now, where's that treasure?", "HALT! Stop right there!", "You are NOT getting my treasure", "Oh really?", "", "Save the chat, intruder.", "Prepare to be taken out."]
+
+          if textCounter == 0 or textCounter == 4:
+            screen.blit(animation_list[0][frame],(666, 60))
+          else:
+            draw_text("?", titleFont, (255, 255, 255), screen, 706, 76)
+
+          draw_text(cutsceneText[textCounter], smallFont, (255, 255, 255), screen, 24, 30)
+
+          draw_text(cutsceneText[textCounter+1], smallFont, (255, 255, 255), screen, 24, 50)
+
+          if continueButton.collidepoint((cutscenemx, cutscenemy)):
+            pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
+            if cutsceneClick[0] == 1:
+              textCounter = textCounter + 2
+
+          if textCounter > 6:
+            inThirdCutscene = False
+            inCutscene = False
+            textCounter = 0
+
+        # Fourth 'cutscene'
+        if inFourthCutscene == True and level == 2:
+          inCutscene = True
+          cutscenemx, cutscenemy = pygame.mouse.get_pos()
+          cutsceneClick = pygame.mouse.get_pressed()
+          chat()
+          continueButton = pygame.Rect(500, 90, 120, 40)
+          pygame.draw.rect(screen, (30, 20, 120), continueButton)
+          draw_text('Continue', smallFont, (255, 255, 255), screen, 522, 100)
+          cutsceneText = ["The treasure is now mine!!", "Now, how do I get out of here?", "Seems like the plan didn't work this time...", "", "I will avenge you, Steven...", "","To be continued...?", ""]
+
+          if textCounter == 0:
+            screen.blit(animation_list[action][frame],(666, 60))
+          elif textCounter == 2:
+            screen.blit(skAnimationList[skAction][skFrame],(682, 60))
+          elif textCounter == 4:
+            screen.blit(skAnimationList[4][0],(682, 60))
+          else:
+            draw_text("?", titleFont, (255, 255, 255), screen, 706, 76)
+            
+          draw_text(cutsceneText[textCounter], smallFont, (255, 255, 255), screen, 24, 30)
+
+          draw_text(cutsceneText[textCounter+1], smallFont, (255, 255, 255), screen, 24, 50)
+
+          if continueButton.collidepoint((cutscenemx, cutscenemy)):
+            pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
+            if cutsceneClick[0] == 1:
+              textCounter = textCounter + 2
+
+          if textCounter > 6:
+            inFourthCutscene = False
+            cutscenesComplete = True
+            inCutscene = False
+            textCounter = 0
+        
+        if inCutscene != True:
+          if key[pygame.K_a] == True and player.x > boundary_left:
+              action = 6
+              #player.x -= 8
+              player.x -= 20
+          elif key[pygame.K_d] == True and player.x < boundary_right:
+              action = 5
+              #player.x += 8
+              player.x += 20
+          elif key[pygame.K_w] == True and player.y > boundary_top:
+              action = 7
+              #player.y -= 8
+              player.y -= 20
+          elif key[pygame.K_s] == True and player.y < boundary_bottom:
+              action = 4
+              #player.y += 8
+              player.y += 20
+          elif key[pygame.K_SPACE] == True:
+              action = 8
+          elif key[pygame.K_SPACE] and key[pygame.K.s] == True:
+              action = 9
+          elif key[pygame.K_e] == True:
+            UI.toggleInventory()
+          else:
+            action=0
 
         # Inventory system
         if UI.inventoryRender:
@@ -471,38 +648,37 @@ def game(last_update, frame, action, Player, enemies, player_score):
         shopDistanceX = player.x - 550
         shopDistanceY = player.y - 600
         shopDistance = (shopDistanceX ** 2 + shopDistanceY ** 2) ** 0.5
-        if shopDistance < 180 and level == 1:
-              shop_active = True
-              playerUsedShop = True
+        if shopDistance < 108 and level == 1:
+              action = 3
+              if playerUsedShop == False:
+                inSecondCutscene = True
+              else:  
+                shop_active = True
+                playerUsedShop = True
         else:
               shop_active = False
 
         if shop_active == True:
-          #Shop / Chat UI
-          shopUIbg = pygame.Rect(0, 0, 800, 150)
-          pygame.draw.rect(screen, (10, 10, 10), shopUIbg)
+          #Shop
+          chat()
+          screen.blit(skAnimationList[skAction][skFrame],(682, 60))
 
-          shopUIchatbox = pygame.Rect(10, 10, 540, 130)
-          pygame.draw.rect(screen, (20, 20, 20), shopUIchatbox)
+          draw_text('Here to purchase an item? Health potions are 10 coins, strength', smallFont, (255, 255, 255), screen, 24, 30)
 
-          shopUIchatboxTop = pygame.Rect(10, 10, 540, 10)
-          pygame.draw.rect(screen, (30, 30, 30), shopUIchatboxTop)
-
-          shopUIimagebox = pygame.Rect(560, 10, 230, 130)
-          pygame.draw.rect(screen, (50, 50, 50), shopUIimagebox)
+          draw_text('potions are 20 coins and the key is 100 coins.', smallFont, (255, 255, 255), screen, 24, 50)
 
           # Buttons for items
-          healthPotionButton = pygame.Rect(20, 90, 200, 40)
+          healthPotionButton = pygame.Rect(20, 90, 180, 40)
           pygame.draw.rect(screen, (30, 0, 120), healthPotionButton)
-          draw_text('Buy Health Potion', smallFont, (255, 255, 255), screen, 30, 100)
+          draw_text('Buy Health Potion', smallFont, (255, 255, 255), screen, 34, 100)
 
-          strengthPotionButton = pygame.Rect(230, 90, 230, 40)
+          strengthPotionButton = pygame.Rect(210, 90, 200, 40)
           pygame.draw.rect(screen, (30, 10, 120), strengthPotionButton)
-          draw_text('Buy Strength Potion', smallFont, (255, 255, 255), screen, 240, 100)
+          draw_text('Buy Strength Potion', smallFont, (255, 255, 255), screen, 223, 100)
 
-          keyButton = pygame.Rect(470, 90, 120, 40)
+          keyButton = pygame.Rect(420, 90, 120, 40)
           pygame.draw.rect(screen, (30, 20, 120), keyButton)
-          draw_text('Buy Key', smallFont, (255, 255, 255), screen, 490, 100)
+          draw_text('Buy Key', smallFont, (255, 255, 255), screen, 446, 100)
 
           # Check if the player clicks on the shop item
           shopmx, shopmy = pygame.mouse.get_pos()
@@ -532,12 +708,13 @@ def game(last_update, frame, action, Player, enemies, player_score):
           if keyButton.collidepoint((shopmx, shopmy)):
             pygame.draw.rect(screen, (60, 40, 150), keyButton, 2)
             if shopClick[0] == 1:
-              if player.coins >= 100:
+              if player.coins >= 100 and hasKey == False:
                 player.coins -= 100
                 UI.inventory.slots.append(InventorySlot("Key", "Images/Items/key.png", (417, 176)))
                 
                 for slot in UI.inventory.slots:
                     if slot.item and slot.item.name == "Key":
+                        hasKey = True
                         slot.count += 1
                         break
         
@@ -562,10 +739,14 @@ def game(last_update, frame, action, Player, enemies, player_score):
           rocksBoxes = pygame.transform.scale(rocksBoxes, (2400, 1920))
           playerUsedShop = False
 
-          if complete == True and len(enemyCoins) == 0:
+          if cutscenesComplete == True and len(enemyCoins) == 0:
             gameComplete(player_score)
+
+          if complete == True:
+            action = 0
+            inFourthCutscene = True
             
-          if boss.health > 0:
+          if inThirdCutscene == False and boss.health > 0:
             boss.move_towards_player(player, camera_x, camera_y, level)
             boss.render(screen, camera_x, camera_y, action, level)
             
@@ -592,8 +773,8 @@ def game(last_update, frame, action, Player, enemies, player_score):
                   for i in range(coinAmount):
                     coin = Coin(1, "Images/Items/coin.png",(boss.map_x + random.randint(20,40), boss.map_y + random.randint(20, 40)))
                     enemyCoins.append(coin)
-                  print("Game Complete")
                   complete = True
+                  print("Game Complete")
               
             # Check for enemy-player collision and update health
             current_time = pygame.time.get_ticks()
