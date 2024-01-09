@@ -14,6 +14,7 @@ pygame.init()
 pygame.display.set_caption('The Whispers')
 screen = pygame.display.set_mode((800, 640),0,0)
 from enemy import *
+#pygame.mixer.init()
 
 # Setting up the fonts that will be used
 smallFont = pygame.font.Font("Fonts/PixeloidSans.ttf", 16)
@@ -98,6 +99,8 @@ def chat():
 
 # A variable to check for the status later
 click = False
+
+#menuMusic = pygame.mixer.Sound("Sounds/Minifantasy_Dungeon_Music/Minifantasy_Dungeon_Music/Music/Goblins_Den_(Regular).wav")
 
 # Main container function that holds the buttons and game functions
 def main_menu():
@@ -326,6 +329,25 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
     enemy_image = pygame.image.load('Images/zombie.jpg')
     enemy_image = pygame.transform.scale(enemy_image, (45, 42))
 
+    # Music / Sounds
+    # Level Music
+    #forestMusic = pygame.mixer.music.load('Sounds/dont_need_a_hero_sfx_and_musics/theme_foret.mp3')
+    #dungeonMusic = pygame.mixer.music.load('Sounds/dont_need_a_hero_sfx_and_musics/theme_ruine.mp3')
+
+    # Player Sounds
+    #playerWalk = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/12_Player_Movement_SFX/08_Step_rock_02.wav")
+    #playerAttack = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/12_Player_Movement_SFX/56_Attack_03.wav")
+    #playerDamaged = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/12_Player_Movement_SFX/61_Hit_03.wav")
+
+    # Shop and Inventory Sounds
+    #purchase = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/10_UI_Menu_SFX/079_Buy_sell_01.wav")
+    #purchaseDenied = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/10_UI_Menu_SFX/033_Denied_03.wav")
+    #itemUsed = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/10_UI_Menu_SFX/051_use_item_01.wav")
+  
+    # Misc. Sounds
+    #dialogue = pygame.mixer.Sound("Sounds/8_bit_16_bit_Sound_Effects/Text 1.wav")
+    #coinCollect = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/10_UI_Menu_SFX/013_Confirm_03.wav")
+  
     # map images
     ground = pygame.image.load('Images/game map (image layers)/Ground.png')
     ground = pygame.transform.scale(ground, (2400, 1920))
@@ -464,6 +486,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
             player.coins += coin.value
             # Remove the coin from the list
             enemyCoins.remove(coin)
+            #coinCollect.play()
           coin.update()
           coin.render(screen, camera_x, camera_y)
 
@@ -495,6 +518,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
           if continueButton.collidepoint((cutscenemx, cutscenemy)):
             pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
             if cutsceneClick[0] == 1:
+              #dialogue.play()
               textCounter = textCounter + 2
           
           if textCounter > 4:
@@ -524,6 +548,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
           if continueButton.collidepoint((cutscenemx, cutscenemy)):
             pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
             if cutsceneClick[0] == 1:
+              #dialogue.play()
               textCounter = textCounter + 2
 
           if textCounter > 20:
@@ -555,6 +580,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
           if continueButton.collidepoint((cutscenemx, cutscenemy)):
             pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
             if cutsceneClick[0] == 1:
+              #dialogue.play()
               textCounter = textCounter + 2
 
           if textCounter > 6:
@@ -589,6 +615,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
           if continueButton.collidepoint((cutscenemx, cutscenemy)):
             pygame.draw.rect(screen, (60, 40, 150), continueButton, 2)
             if cutsceneClick[0] == 1:
+              #dialogue.play()
               textCounter = textCounter + 2
 
           if textCounter > 6:
@@ -599,25 +626,28 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
         
         if inCutscene != True:
           if key[pygame.K_a] == True and player.x > boundary_left:
+              #playerWalk.play()
               action = 6
               #player.x -= 8
               player.x -= 20
           elif key[pygame.K_d] == True and player.x < boundary_right:
+              #playerWalk.play()
               action = 5
               #player.x += 8
               player.x += 20
           elif key[pygame.K_w] == True and player.y > boundary_top:
+              #playerWalk.play()
               action = 7
               #player.y -= 8
               player.y -= 20
           elif key[pygame.K_s] == True and player.y < boundary_bottom:
+              #playerWalk.play()
               action = 4
               #player.y += 8
               player.y += 20
           elif key[pygame.K_SPACE] == True:
+              #playerAttack.play()
               action = 8
-          elif key[pygame.K_SPACE] and key[pygame.K.s] == True:
-              action = 9
           elif key[pygame.K_e] == True:
             UI.toggleInventory()
           else:
@@ -636,11 +666,13 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
                       player_health += 15
                     else:
                       player_health = player_health + (50 - player_health)
+                    #itemUsed.play()
                     print("Health Potion Used")
                     
                   if slot.item and slot.item.name == "Strength Potion" and player_strength < 5 and slot.count > 0:
                     slot.count -= 1
                     player_strength += 1
+                    #itemUsed.play()
                     print("Strength Potion Used")
                     
         # Shop system
@@ -661,6 +693,7 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
         if shop_active == True:
           #Shop
           chat()
+          #dialogue.play()
           screen.blit(skAnimationList[skAction][skFrame],(682, 60))
 
           draw_text('Here to purchase an item? Health potions are 10 coins, strength', smallFont, (255, 255, 255), screen, 24, 30)
@@ -687,23 +720,31 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
             pygame.draw.rect(screen, (60, 40, 150), healthPotionButton, 2)
             if shopClick[0] == 1:
               if player.coins >= 10:
+                #purchase.play()
                 player.coins -= 10
                 
                 for slot in UI.inventory.slots:
                   if slot.item and slot.item.name == "Health Potion":
                       slot.count += 1
                       break
+              else:
+                #purchaseDenied.play()
+                pass
 
           if strengthPotionButton.collidepoint((shopmx, shopmy)):
               pygame.draw.rect(screen, (60, 40, 150), strengthPotionButton, 2)
               if shopClick[0] == 1:
                 if player.coins >= 20:
+                  #purchase.play()
                   player.coins -= 20
 
                   for slot in UI.inventory.slots:
                       if slot.item and slot.item.name == "Strength Potion":
                           slot.count += 1
                           break
+                else:
+                  #purchaseDenied.play()
+                  pass
                         
           if keyButton.collidepoint((shopmx, shopmy)):
             pygame.draw.rect(screen, (60, 40, 150), keyButton, 2)
@@ -717,6 +758,9 @@ def game(last_update, frame, action, Player, enemies, player_score, skAction, sk
                         hasKey = True
                         slot.count += 1
                         break
+              else:
+                #purchaseDenied.play()
+                pass
         
         # Level 2
         for slot in UI.inventory.slots:

@@ -1,6 +1,13 @@
 # enemy.py
 import pygame
 import spritesheet
+#pygame.mixer.init()
+
+# Enemy and Boss Sounds
+#enemyWalk = pygame.mixer.Sound("Sounds/Minifantasy_Dungeon_SFX/25_orc_walk_stone_2.wav")
+
+#bossAttack = pygame.mixer.Sound("Sounds/dont_need_a_hero_sfx_and_musics/sfx_sword.mp3")
+#bossWalk = pygame.mixer.Sound("Sounds/RPG_Essentials_Free/12_Player_Movement_SFX/08_Step_rock_02.wav")
 
 # Loading the sprite sheets for animations
 enemySpriteSheetImage = pygame.image.load('Images/zombie spritesheet.png').convert_alpha()
@@ -84,6 +91,7 @@ class Enemy:
           # Plays enemy animations depending upon the direction they are facing and other factors such as if they are in range to "attack" the player
           if self.directionToGo == "Up":
             if self.health <= 0:
+              #enemyWalk.play()
               action = 9
             elif self.distance < 30:
               action = 5
@@ -91,12 +99,14 @@ class Enemy:
               action = 1
           elif self.directionToGo == "Down":
             if self.health <= 0:
+              #enemyWalk.play()
               action = 8
             elif self.distance < 30:
               action = 4
             else:
               action = 0
           elif self.directionToGo == "Left":
+            #enemyWalk.play()
             if self.health <= 0:
               action = 11
             elif self.distance < 30:
@@ -104,6 +114,7 @@ class Enemy:
             else:
               action = 3
           elif self.directionToGo == "Right":
+            #enemyWalk.play()
             if self.health <= 0:
               action = 10
             elif self.distance < 30:
@@ -136,22 +147,30 @@ class Enemy:
           self.enemyCurrentTime = pygame.time.get_ticks()
           # Plays enemy animations depending upon the direction they are facing and other factors such as if they are in range to "attack" the player
           if self.directionToGo == "Up":
+            #bossWalk.play()
             if self.distance < 30:
+              #bossAttack.play()
               action = 6
             else:
               action = 2
           elif self.directionToGo == "Down":
+            #bossWalk.play()
             if self.distance < 30:
+              #bossAttack.play()
               action = 4
             else:
               action = 0
           elif self.directionToGo == "Left":
+            #bossWalk.play()
             if self.distance < 30:
+              #bossAttack.play()
               action = 7
             else:
               action = 3
           elif self.directionToGo == "Right":
+            #bossWalk.play()
             if self.distance < 30:
+              #bossAttack.play()
               action = 5
             else:
               action = 1
