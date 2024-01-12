@@ -764,7 +764,7 @@ def game(lastUpdate, frame, action, Player, enemies, playerScore, skAction, skFr
 
         # Text on top of every image layer so it's visible to the player. It lets them know a wave is spawning soon
         nextWaveSpawn = waveInterval - (currentTime - lastWaveTime - 10000)
-        if level == 1 and 0 < nextWaveSpawn <= 6000:
+        if playerUsedShop == True and level == 1 and 0 < nextWaveSpawn <= 6000:
           drawText('Enemy wave spawning soon!', boldFont, (0, 0, 0), screen, 180, 542)
           drawText('Enemy wave spawning soon!', boldFont, (255, 255, 255), screen, 178, 540)
           
