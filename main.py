@@ -635,7 +635,7 @@ def game(lastUpdate, frame, action, Player, enemies, playerScore, skAction, skFr
           drawText('Continue', smallFont, (255, 255, 255), screen, 522, 100)
           
           # Array of text used for the cutscene
-          cutsceneText = ["Well this is spacious...", "Now, where's that treasure?", "HALT! Stop right there!", "You are NOT getting my treasure", "Oh really?", "", "Save the chat, intruder.", "Prepare to be taken out.", "", ""]
+          cutsceneText = ["Well this is spacious...", "Now, where's that treasure?", "HALT! Stop right there!", "You are NOT getting my treasure", "Oh really?", "", "Save the chat, intruder.", "Prepare to be taken out.", "", "", "", ""]
 
           # Displays character, button and text
           if textCounter == 0 or textCounter == 4:
